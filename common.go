@@ -14,11 +14,11 @@ type Entry struct {
 }
 
 type Result struct {
-	Name      string
-	Command   string
-	Status    string
-	Time      float64
-	Stdout    string
-	Stderr    string
-	ErrorCode int
+	Name    string
+	Command string
+	Status  string
+	Time    float64
+	Stdout  string
+	Stderr  string
+	Error   string
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	shellwords "github.com/mattn/go-shellwords"
 	"gopkg.in/yaml.v2"
 )
 
@@ -41,30 +44,43 @@ func main() {
 	}
 
 	for _, v := range config {
-		cmd, args := TreatCommand(v.Command)
-		work := exec.Command(cmd, args...)
+		args, err := shellwords.Parse(v.Command)
+		if err != nil {
+			log.Printf("Error when parsing command %s for %s.\n", v.Command, v.Name)
+		}
+
+		cmd := exec.Command(args[0], args[1:]...)
 		if len(v.WorkDir) > 0 {
-			work.Dir = v.WorkDir
+			cmd.Dir = v.WorkDir
 		}
 		if len(v.Stdin) > 0 {
-			work.Stdin = strings.NewReader(v.Stdin)
+			cmd.Stdin = strings.NewReader(v.Stdin)
 		}
+
+		cmdOut := &bytes.Buffer{}
+		cmdErr := &bytes.Buffer{}
+		cmd.Stdout = cmdOut
+		cmd.Stderr = cmdErr
+
 		start := time.Now()
-		out, err := work.Output()
+		//out, err := cmd.CombinedOutput()
+		err = cmd.Run()
 		elapsed := time.Since(start)
 		if err != nil {
-			log.Printf("Error when running '%s' for %s: %s\n", v.Command, v.Name, err)
+			log.Printf("Error when running '%s' for %s: %s\n", v.Command, v.Name, string(cmdErr.Bytes()))
+
+		} else {
+			log.Printf("Ran command for %s succesfully. Result: %s\n", v.Name, string(cmdOut.Bytes()))
 		}
-		log.Printf("Ran command for %s succesfully. Result: %s\n", v.Name, out)
 
 		if v.NoLog == false {
-			var t = Result{Name: v.Name, Command: v.Command, Stdout: string(out)}
+			var t = Result{Name: v.Name, Command: v.Command, Stdout: string(cmdOut.Bytes()), Stderr: string(cmdErr.Bytes())}
 			if err == nil {
 				t.Status = "ok"
 				succesful++
 			} else {
 				t.Status = "error"
-				t.Stderr = err.Error()
+				t.Error = err.Error()
 				errors++
 			}
 			t.Time = elapsed.Seconds()
@@ -73,7 +89,8 @@ func main() {
 		}
 	}
 
-	fmt.Println(results)
+	j, err := json.Marshal(results)
+	fmt.Println(string(j))
 
 	if errors == 0 {
 		fmt.Println("no errors")

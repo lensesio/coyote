@@ -1,7 +1,7 @@
 - name: ls
-  command: ls, -l
+  command: ls
 - name: echo
-  command: echo, hello
+  command: echo hello
 - name: error
-  command: exit, 1
+  command: ls /root
 
