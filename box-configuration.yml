@@ -1,0 +1,8 @@
+- name: clone intro repo
+  command: git, clone, https://gitlab.com/landoop/landoop-intro.git
+  nolog: true
+- name: tutorial 1, hdfs put
+  command: hadoop, fs, -put, ../README.md, input.md
+  workdir: /home/marios/landoop-intro/Hadoop-101
+- name: tutorial 1, wordcount
+  command: hadoop, jar, hadoop-examples.jar, wordcount, input.md, results
