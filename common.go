@@ -5,12 +5,13 @@ landoop-box-agent.
 package main
 
 type Entry struct {
-	Name    string `yaml:"name"`
-	WorkDir string `yaml:"workdir"`
-	Command string `yaml:"command,omitempty"`
-	Stdin   string `yaml:"stdin,omitempty"`
-	Expect  string `yaml:"expect,omitempty"`
-	NoLog   bool   `yaml:"nolog",omitempty`
+	Name    string   `yaml:"name"`
+	WorkDir string   `yaml:"workdir"`
+	Command string   `yaml:"command,omitempty"`
+	Stdin   string   `yaml:"stdin,omitempty"`
+	Expect  string   `yaml:"expect,omitempty"`
+	NoLog   bool     `yaml:"nolog",omitempty`
+	EnvVars []string `yaml:"env",omitempty`
 }
 
 type Result struct {

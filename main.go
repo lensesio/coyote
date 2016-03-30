@@ -58,7 +58,12 @@ func main() {
 		if len(v.Stdin) > 0 {
 			cmd.Stdin = strings.NewReader(v.Stdin)
 		}
-
+		cmd.Env = os.Environ()
+		if len(v.EnvVars) > 0 {
+			for _, v := range v.EnvVars {
+				cmd.Env = append(cmd.Env, v)
+			}
+		}
 		cmdOut := &bytes.Buffer{}
 		cmdErr := &bytes.Buffer{}
 		cmd.Stdout = cmdOut

@@ -10,9 +10,6 @@
   command: hadoop jar hadoop-examples.jar wordcount input.md results
   workdir: /home/marios/landoop-intro/Hadoop-101
 
-- name: Hadoop Tutorial 1, unix tools
-  command: hadoop fs -cat results/part-* | sort -k 2 -n | awk {'print $1'}
-
 - name: Hadoop Tutorial 2, build code
   command: hadoop com.sun.tools.javac.Main WordCount.java
   workdir: /home/marios/landoop-intro/Hadoop-102
