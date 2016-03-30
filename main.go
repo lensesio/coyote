@@ -76,7 +76,7 @@ func main() {
 		}
 
 		if v.NoLog == false {
-			var t = Result{Name: v.Name, Command: v.Command, Stdout: string(cmdOut.Bytes()), Stderr: string(cmdErr.Bytes())}
+			var t = Result{Name: v.Name, Command: v.Command, Stdout: strings.Split(string(cmdOut.Bytes()), "\n"), Stderr: strings.Split(string(cmdErr.Bytes()), "\n")}
 			if err == nil {
 				t.Status = "ok"
 				succesful++
@@ -101,6 +101,9 @@ func main() {
 				return true
 			}
 			return false
+		},
+		"newLineToBr": func(s string) string {
+			return strings.Replace(s, "\n", "\n<br>\n", -1)
 		},
 	}
 	t, err := template.New("").Funcs(funcMap).ParseFiles("table.template")

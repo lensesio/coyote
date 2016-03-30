@@ -1,5 +1,5 @@
 - name: ls
-  command: ls
+  command: ls -lR .
 - name: echo
   command: echo hello
 - name: error

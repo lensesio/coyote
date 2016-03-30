@@ -18,7 +18,7 @@ type Result struct {
 	Command string
 	Status  string
 	Time    float64
-	Stdout  string
-	Stderr  string
+	Stdout  []string
+	Stderr  []string
 	Error   string
 }

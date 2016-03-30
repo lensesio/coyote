@@ -9,18 +9,18 @@
             .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;border-color:#aaa;color:#333;background-color:#fff;border-top-width:1px;border-bottom-width:1px;}
             .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;border-color:#aaa;color:#fff;background-color:#f38630;border-top-width:1px;border-bottom-width:1px;}
             .tg .tg-j2zy{background-color:#FCFBE3;vertical-align:top}
-            .tg .tg-zczf{background-color:#FCFBE3;text-align:right;vertical-align:top}
-            .tg .tg-lqy6{text-align:right;vertical-align:top}
+            .tg .tg-zczf{background-color:#FCFBE3;text-align:left;vertical-align:top}
+            .tg .tg-lqy6{text-align:left;vertical-align:top}
             .tg .tg-9hbo{font-weight:bold;vertical-align:top}
-            .tg .tg-b5xm{background-color:#fe0000;vertical-align:top}
+            .tg .tg-b5xm{background-color:#fe0000;text-align:center;vertical-align:top}
             .tg .tg-yw4l{vertical-align:top}
-            .tg .tg-y0xi{background-color:#32cb00;vertical-align:top}
+            .tg .tg-y0xi{background-color:#32cb00;text-align:center;vertical-align:top}
           </style>
           <table class="tg">
             <tr>
               <th class="tg-9hbo">Test</th>
               <th class="tg-9hbo">Status</th>
-              <th class="tg-9hbo">Time</th>
+              <th class="tg-9hbo">Time (sec)</th>
               <th class="tg-9hbo">Error</th>
               <th class="tg-9hbo">Command</th>
               <th class="tg-9hbo">StdOut</th>
@@ -34,46 +34,19 @@
 	      <td class="tg-zczf">{{ $v.Time }}</td>
 	      <td class="tg-zczf">{{ $v.Error }}</td>
 	      <td class="tg-zczf">{{ $v.Command }}</td>
-	      <td class="tg-zczf">{{ $v.Stdout }}</td>
-	      <td class="tg-j2zy">{{ $v.Stderr }}</td>
+	      <td class="tg-zczf">{{ range $v.Stdout }}{{ . }}</br>{{ end }}</td>
+	      <td class="tg-zczf">{{ range $v.Stderr }}{{ . }}</br>{{ end }}</td>
               {{ else }}
               <td class="tg-yw4l">{{ $v.Name }}</td>
               <td class="{{ if eq $v.Status "ok"}}tg-y0xi{{ else }}tg-b5xm{{ end }}">{{ $v.Status }}</td>
 	      <td class="tg-lqy6">{{ $v.Time }}</td>
 	      <td class="tg-lqy6">{{ $v.Error }}</td>
 	      <td class="tg-lqy6">{{ $v.Command }}</td>
-	      <td class="tg-lqy6">{{ $v.Stdout }}</td>
-	      <td class="tg-yw4l">{{ $v.Stderr }}</td>
+	      <td class="tg-lqy6">{{ range $v.Stdout }}{{ . }}</br>{{ end }}</td>
+	      <td class="tg-lqy6">{{ range $v.Stderr }}{{ . }}</br>{{ end }}</td>
               {{ end }}
 	    </tr>
             {{ end }}
-            <!-- <tr> -->
-            <!--   <td class="tg-j2zy">1</td> -->
-            <!--   <td class="tg-b5xm">Swimming</td> -->
-            <!--   <td class="tg-zczf">1:30</td> -->
-            <!--   <td class="tg-zczf">2:05</td> -->
-            <!--   <td class="tg-zczf">1:15</td> -->
-            <!--   <td class="tg-zczf">1:41</td> -->
-            <!--   <td class="tg-j2zy"></td> -->
-            <!-- </tr> -->
-            <!-- <tr> -->
-            <!--   <td class="tg-yw4l">2</td> -->
-            <!--   <td class="tg-y0xi">Running</td> -->
-            <!--   <td class="tg-lqy6">15:30</td> -->
-            <!--   <td class="tg-lqy6">14:10</td> -->
-            <!--   <td class="tg-lqy6">15:45</td> -->
-            <!--   <td class="tg-lqy6">16:00</td> -->
-            <!--   <td class="tg-yw4l"></td> -->
-            <!-- </tr> -->
-            <!-- <tr> -->
-            <!--   <td class="tg-j2zy">3</td> -->
-            <!--   <td class="tg-j2zy">Shooting</td> -->
-            <!--   <td class="tg-zczf">70%</td> -->
-            <!--   <td class="tg-zczf">55%</td> -->
-            <!--   <td class="tg-zczf">90%</td> -->
-            <!--   <td class="tg-zczf">88%</td> -->
-            <!--   <td class="tg-j2zy"></td> -->
-            <!-- </tr> -->
-            </table>
+          </table>
         </body>
 </html>
