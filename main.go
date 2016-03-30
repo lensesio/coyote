@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -34,7 +36,7 @@ func main() {
 	}
 
 	var config []Entry
-	var results []Result
+	var Results []Result
 	var succesful = 0
 	var errors = 0
 
@@ -67,10 +69,10 @@ func main() {
 		err = cmd.Run()
 		elapsed := time.Since(start)
 		if err != nil {
-			log.Printf("Error when running '%s' for %s: %s\n", v.Command, v.Name, string(cmdErr.Bytes()))
+			log.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(string(cmdErr.Bytes())))
 
 		} else {
-			log.Printf("Ran command for %s succesfully. Result: %s\n", v.Name, string(cmdOut.Bytes()))
+			log.Printf("Success, command '%s', test '%s'. Stdout: %s\n", v.Command, v.Name, strconv.Quote(string(cmdOut.Bytes())))
 		}
 
 		if v.NoLog == false {
@@ -84,14 +86,45 @@ func main() {
 				errors++
 			}
 			t.Time = elapsed.Seconds()
-			results = append(results, t)
+			Results = append(Results, t)
 
 		}
 	}
 
-	j, err := json.Marshal(results)
-	fmt.Println(string(j))
+	// t, err := template.ParseFiles("table.template")
+	// if err != nil {
+	// 	log.Println(err)
+	// } else {
+	funcMap := template.FuncMap{
+		"isEven": func(i int) bool {
+			if i%2 == 0 {
+				return true
+			}
+			return false
+		},
+	}
+	t, err := template.New("").Funcs(funcMap).ParseFiles("table.template")
+	if err != nil {
+		log.Println(err)
+	} else {
+		f, err := os.Create("out.html")
+		defer f.Close()
+		if err != nil {
+			log.Println(err)
 
+		} else {
+			h := &bytes.Buffer{}
+			err = t.ExecuteTemplate(h, "table.template", Results)
+			if err != nil {
+				log.Println(err)
+			}
+			f.Write(h.Bytes())
+		}
+
+	}
+
+	j, err := json.Marshal(Results)
+	fmt.Println(string(j))
 	if errors == 0 {
 		fmt.Println("no errors")
 	} else {
@@ -100,18 +133,18 @@ func main() {
 	}
 }
 
-// TreatCommand takes a comma separated string and converts it to a cmd and []args,
-// removing commads and whitespace in the process.
-// It isn't complete (it will fail for commands containing commas) but it has a bit of
-// work to catch this case, due to command being provided by a yml entry.
-func TreatCommand(s string) (string, []string) {
-	tokens := strings.Split(s, ",")
-	command := strings.TrimSpace(tokens[0])
-	var args []string
-	if len(tokens) > 1 {
-		for i := 1; i < len(tokens); i++ {
-			args = append(args, strings.TrimSpace(tokens[i]))
-		}
-	}
-	return command, args
-}
+// // TreatCommand takes a comma separated string and converts it to a cmd and []args,
+// // removing commads and whitespace in the process.
+// // It isn't complete (it will fail for commands containing commas) but it has a bit of
+// // work to catch this case, due to command being provided by a yml entry.
+// func TreatCommand(s string) (string, []string) {
+// 	tokens := strings.Split(s, ",")
+// 	command := strings.TrimSpace(tokens[0])
+// 	var args []string
+// 	if len(tokens) > 1 {
+// 		for i := 1; i < len(tokens); i++ {
+// 			args = append(args, strings.TrimSpace(tokens[i]))
+// 		}
+// 	}
+// 	return command, args
+// }
