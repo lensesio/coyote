@@ -102,8 +102,11 @@ func main() {
 			}
 			return false
 		},
-		"newLineToBr": func(s string) string {
-			return strings.Replace(s, "\n", "\n<br>\n", -1)
+		"showmore": func(s []string) bool {
+			if len(s) > 1 {
+				return true
+			}
+			return false
 		},
 	}
 	t, err := template.New("").Funcs(funcMap).ParseFiles("table.template")

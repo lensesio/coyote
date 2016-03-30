@@ -1,9 +1,51 @@
-- name: clone intro repo
+- name: Clone Landoop Intro Repo
   command: git clone https://gitlab.com/landoop/landoop-intro.git
-  nolog: true
-- name: tutorial 1, hdfs put
+  workdir: $HOME
+
+- name: Hadoop Run Jar Tutorial 1, hdfs put
   command: hadoop fs -put ../README.md input.md
-  workdir: /home/marios/landoop-intro/Hadoop-101
-- name: tutorial 1, wordcount
+  workdir: $HOME/landoop-intro/Hadoop-101
+
+- name: Hadoop Tutorial 1, wordcount
   command: hadoop jar hadoop-examples.jar wordcount input.md results
-  workdir: /home/marios/landoop-intro/Hadoop-101
+  workdir: $HOME/landoop-intro/Hadoop-101
+
+- name: Hadoop Tutorial 1, unix tools
+  command: hadoop fs -cat results/part-* | sort -k 2 -n | awk {'print $1'}
+
+- name: Hadoop Tutorial 2, build code
+  command: hadoop com.sun.tools.javac.Main WordCount.java
+  workdir: $HOME/landoop-intro/Hadoop-102
+
+- name: Hadoop Tutorial 2, create jar
+  command: jar cf wc.jar WordCount*.class
+  workdir: $HOME/landoop-intro/Hadoop-102
+
+- name: Hadoop Tutorial 2, run jar
+  command: hadoop jar wc.jar WordCount input.md results-2
+  workdir: $HOME/landoop-intro/Hadoop-102
+
+- command: hadoop fs -rm -r input.md results results-2
+  nolog: true
+
+- name: Sqoop Tutorial, import
+  command: |
+    sqoop-import --connect jdbc:mysql://mariadb.landoop.com/northwind \
+                 --username data --password base \
+                 --table Orders --m 1
+
+- command: hadoop fs -rm -r Orders
+  nolog: true
+
+- name: Cloudera Kafka Performance Test (Kerberos)
+  command: |
+    /opt/confluent-2.0.1/bin/kafka-prucer-perf-test --topic test-rep-one --throughput 100000 --record-size 500 --num-records 1000000 \
+    --producer-props bootstrap.servers="cloudera.landoop.com:9092" security.protocol=SASL_PLAINTEXT
+
+- name: Confluent Kafka Performance Test (Non-Kerberos)
+  command: |
+    /opt/confluent-2.0.1/bin/kafka-prucer-perf-test --topic test-rep-one --throughput 100000 --record-size 500 --num-records 1000000 \
+    --producer-props bootstrap.servers="cloudera.landoop.com:29092"
+
+- command: rm -rf $HOME/landoop-intro
+  nolog: true

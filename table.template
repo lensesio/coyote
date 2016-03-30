@@ -15,6 +15,8 @@
             .tg .tg-b5xm{background-color:#fe0000;text-align:center;vertical-align:top}
             .tg .tg-yw4l{vertical-align:top}
             .tg .tg-y0xi{background-color:#32cb00;text-align:center;vertical-align:top}
+            .hideContent {overflow:hidden;line-height:1em;height:2em;}
+            .showContent {line-height:1em;height:auto;}
           </style>
           <table class="tg">
             <tr>
@@ -31,22 +33,54 @@
               {{ if isEven $k }}
 	      <td class="tg-j2zy">{{ $v.Name }}</td>
 	      <td class="{{ if eq $v.Status "ok"}}tg-y0xi{{ else }}tg-b5xm{{ end }}">{{ $v.Status }}</td>
-	      <td class="tg-zczf">{{ $v.Time }}</td>
+	      <td class="tg-zczf">{{ $v.Time | printf "%.3f" }}</td>
 	      <td class="tg-zczf">{{ $v.Error }}</td>
 	      <td class="tg-zczf">{{ $v.Command }}</td>
-	      <td class="tg-zczf">{{ range $v.Stdout }}{{ . }}</br>{{ end }}</td>
-	      <td class="tg-zczf">{{ range $v.Stderr }}{{ . }}</br>{{ end }}</td>
+	      <td class="tg-zczf">{{ if showmore $v.Stdout }}
+                <div class="content hideContent">{{ range $v.Stdout }}{{ . }}</br>{{ end }}</div><div class="show-more"><a href="#">Show more</a></div>{{ else }}
+                {{ range $v.Stdout }}{{ . }}</br>{{ end }}{{ end }}
+              </td>
+	      <td class="tg-zczf">{{ if showmore $v.Stderr }}
+                <div class="content hideContent">{{ range $v.Stderr }}{{ . }}</br>{{ end }}</div><div class="show-more"><a href="#">Show more</a></div>{{ else }}
+                {{ range $v.Stderr }}{{ . }}</br>{{ end }}{{ end }}
+              </td>
               {{ else }}
               <td class="tg-yw4l">{{ $v.Name }}</td>
               <td class="{{ if eq $v.Status "ok"}}tg-y0xi{{ else }}tg-b5xm{{ end }}">{{ $v.Status }}</td>
-	      <td class="tg-lqy6">{{ $v.Time }}</td>
+	      <td class="tg-lqy6">{{ $v.Time | printf "%1.3f" }}</td>
 	      <td class="tg-lqy6">{{ $v.Error }}</td>
 	      <td class="tg-lqy6">{{ $v.Command }}</td>
-	      <td class="tg-lqy6">{{ range $v.Stdout }}{{ . }}</br>{{ end }}</td>
-	      <td class="tg-lqy6">{{ range $v.Stderr }}{{ . }}</br>{{ end }}</td>
+	      <td class="tg-lqy6">{{ if showmore $v.Stdout }}
+                <div class="content hideContent">{{ range $v.Stdout }}{{ . }}</br>{{ end }}</div><div class="show-more"><a href="#">Show more</a></div>{{ else }}
+                {{ range $v.Stdout }}{{ . }}</br>{{ end }}{{ end }}
+              </td>
+	      <td class="tg-lqy6">{{ if showmore $v.Stderr }}
+                <div class="content hideContent">{{ range $v.Stderr }}{{ . }}</br>{{ end }}</div><div class="show-more"><a href="#">Show more</a></div>{{ else }}
+                {{ range $v.Stderr }}{{ . }}</br>{{ end }}{{ end }}
+              </td>
               {{ end }}
 	    </tr>
             {{ end }}
           </table>
+          <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
+          <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+          <!-- http://stackoverflow.com/questions/12307666/how-to-create-a-show-more-button-and-specify-how-many-lines-of-text-can-be-ini -->
+          <script>
+            $(".show-more a").on("click", function() {
+            var $this = $(this);
+            var $content = $this.parent().prev("div.content");
+            var linkText = $this.text().toUpperCase();
+
+            if(linkText === "SHOW MORE"){
+            linkText = "Show less";
+            $content.switchClass("hideContent", "showContent", 400);
+            } else {
+            linkText = "Show more";
+            $content.switchClass("showContent", "hideContent", 400);
+            };
+
+            $this.text(linkText);
+            });
+          </script>
         </body>
 </html>
