@@ -15,7 +15,7 @@
   workdir: /home/marios/landoop-intro/Hadoop-102
 
 - name: Hadoop Tutorial 2, create jar
-  command: jar cf wc.jar WordCount.class
+  command: jar cf wc.jar WordCount.class WordCount$IntSumReducer.class WordCount$TokenizerMapper.class
   workdir: /home/marios/landoop-intro/Hadoop-102
 
 - name: Hadoop Tutorial 2, run jar
