@@ -30,6 +30,7 @@ func main() {
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	logger.Printf("Starting coyote-tester.\n")
 
+	// Open yml configuration
 	configData, err := ioutil.ReadFile(*configFile)
 	if err != nil {
 		logger.Fatalln(err)
@@ -40,11 +41,13 @@ func main() {
 	var succesful = 0
 	var errors = 0
 
+	// Read yml configuration
 	err = yaml.Unmarshal(configData, &config)
 	if err != nil {
 		logger.Fatalf("Error reading configuration file: %v", err)
 	}
 
+	// For entries in configuration
 	for _, v := range config {
 		args, err := shellwords.Parse(v.Command)
 		if err != nil {
@@ -96,10 +99,6 @@ func main() {
 		}
 	}
 
-	// t, err := template.ParseFiles("table.template")
-	// if err != nil {
-	// 	log.Println(err)
-	// } else {
 	funcMap := template.FuncMap{
 		"isEven": func(i int) bool {
 			if i%2 == 0 {
@@ -114,7 +113,9 @@ func main() {
 			return false
 		},
 	}
-	t, err := template.New("").Funcs(funcMap).ParseFiles("table.template")
+	// t, err := template.New("").Funcs(funcMap).ParseFiles("table.template")
+	t, err := template.New("output").Funcs(funcMap).Parse(html)
+
 	if err != nil {
 		log.Println(err)
 	} else {
@@ -125,7 +126,7 @@ func main() {
 
 		} else {
 			h := &bytes.Buffer{}
-			err = t.ExecuteTemplate(h, "table.template", Results)
+			err = t.Execute(h, Results)
 			if err != nil {
 				log.Println(err)
 			}
@@ -143,19 +144,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-// // TreatCommand takes a comma separated string and converts it to a cmd and []args,
-// // removing commads and whitespace in the process.
-// // It isn't complete (it will fail for commands containing commas) but it has a bit of
-// // work to catch this case, due to command being provided by a yml entry.
-// func TreatCommand(s string) (string, []string) {
-// 	tokens := strings.Split(s, ",")
-// 	command := strings.TrimSpace(tokens[0])
-// 	var args []string
-// 	if len(tokens) > 1 {
-// 		for i := 1; i < len(tokens); i++ {
-// 			args = append(args, strings.TrimSpace(tokens[i]))
-// 		}
-// 	}
-// 	return command, args
-// }

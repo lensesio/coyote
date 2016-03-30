@@ -1,7 +1,3 @@
-/*
-Package common includes structs and common functions used by
-landoop-box-agent.
-*/
 package main
 
 type Entry struct {
