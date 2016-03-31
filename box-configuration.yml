@@ -52,14 +52,14 @@
 - name: Cloudera Kafka Env Vars (no fail)
   command: |
     bash -c '
-    echo -e\
+    echo -e "\
     Zookeeper (ZK) $ZK\n\
     Broker List (BL) $BL\n\
     Bootstrap Server (BS) $BS\n\
     JAAS Login Configuration File (JAAS) $JAAS\n\
     producer.properties path (PROD_PR) $PROD_PR\n\
     consumer.properties path (CONS_PR) $CONS_PR\n\
-    KAFKA_OPTS (KAFKA_OPTS) $KAFKA_OPTS'
+    KAFKA_OPTS (KAFKA_OPTS) $KAFKA_OPTS"'
 
 - name: Cloudera Kafka Performance Test (Kerberos)
   command: |
