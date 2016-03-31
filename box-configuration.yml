@@ -34,6 +34,33 @@
 - command: hadoop fs -rm -r Orders
   nolog: true
 
+- name: Sqoop Tutorial, hive create db
+  command: hive -e "CREATE DATABASE marios_tutorial"
+
+- name: Sqoop Tutorial, import into hive
+  command: |
+    sqoop import -jt local --connect jdbc:mysql://mariadb.landoop.com/northwind
+                 --username data --password base
+                 --query 'SELECT * FROM Orders WHERE $CONDITIONS' --m 1
+                 --target-dir temp-orders --create-hive-table
+                 --hive-table "marios_tutorial.orders" --hive-import
+                 --hive-overwrite --create-hive-table
+
+- name: Sqoop Tutorial, drop hive database
+  command: hive -e "USE marios_tutorial; DROP TABLE orders; DROP DATABASE marios_tutorial"
+
+- name: Cloudera Kafka Env Vars (no fail)
+  command: |
+    bash -c '
+    echo -e\
+    Zookeeper (ZK) $ZK\n\
+    Broker List (BL) $BL\n\
+    Bootstrap Server (BS) $BS\n\
+    JAAS Login Configuration File (JAAS) $JAAS\n\
+    producer.properties path (PROD_PR) $PROD_PR\n\
+    consumer.properties path (CONS_PR) $CONS_PR\n\
+    KAFKA_OPTS (KAFKA_OPTS) $KAFKA_OPTS'
+
 - name: Cloudera Kafka Performance Test (Kerberos)
   command: |
     /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
