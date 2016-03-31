@@ -36,12 +36,12 @@
 
 - name: Cloudera Kafka Performance Test (Kerberos)
   command: |
-    /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 500 --num-records 1000000
+    /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
     --producer-props bootstrap.servers="cloudera.landoop.com:9092" security.protocol=SASL_PLAINTEXT
 
 - name: Confluent Kafka Performance Test (Non-Kerberos)
   command: |
-    /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 500 --num-records 1000000
+    /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
     --producer-props bootstrap.servers="cloudera.landoop.com:29092"
 
 - command: rm -rf /home/marios/landoop-intro
