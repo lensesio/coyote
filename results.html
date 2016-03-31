@@ -35,7 +35,10 @@
 	      <td class="{{ if eq $v.Status "ok"}}tg-y0xi{{ else }}tg-b5xm{{ end }}">{{ $v.Status }}</td>
 	      <td class="tg-zczf">{{ $v.Time | printf "%.3f" }}</td>
 	      <td class="tg-zczf">{{ $v.Error }}</td>
-	      <td class="tg-zczf">{{ $v.Command }}</td>
+	      <td class="tg-zczf">{{ splitString $v.Command }}
+                  {{ if showmore . }}{{ range . }}{{ . }}</br>{{ end }}</div><div class="show-more"><a href="#">Show more</a></div>{{ else }}
+                  {{ range . }}{{ . }}</br>{{ end }}{{ end }}
+              </td>
 	      <td class="tg-zczf">{{ if showmore $v.Stdout }}
                 <div class="content hideContent">{{ range $v.Stdout }}{{ . }}</br>{{ end }}</div><div class="show-more"><a href="#">Show more</a></div>{{ else }}
                 {{ range $v.Stdout }}{{ . }}</br>{{ end }}{{ end }}

@@ -112,6 +112,12 @@ func main() {
 			}
 			return false
 		},
+		"splitString": func(s string) []string {
+			if s == "" {
+				return []string{""}
+			}
+			return strings.Split(s, "\n")
+		},
 	}
 	// t, err := template.New("").Funcs(funcMap).ParseFiles("table.template")
 	t, err := template.New("output").Funcs(funcMap).Parse(html)
