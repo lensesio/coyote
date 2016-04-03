@@ -18,6 +18,10 @@
             .hideContent {overflow:hidden;line-height:1em;height:2em;}
             .showContent {line-height:1em;height:auto;}
           </style>
+          <div>
+              <h2> Tests passed: {{ .Successful }} out of {{ .TotalTests }}.</h2>
+              <h2> Errors: {{ .Errors }}</h2>
+              <h2> Time Elapsed: {{ .TotalTime }} seconds</h2>
           <table class="tg">
             <tr>
               <th class="tg-9hbo">Test</th>
@@ -28,6 +32,7 @@
               <th class="tg-9hbo">StdOut</th>
               <th class="tg-9hbo">StdErr</th>
             </tr>
+            {{ with .Results }}
             {{ range $k, $v := . }}
 	    <tr>
               {{ if isEven $k }}
@@ -84,6 +89,7 @@
               </td>
               {{ end }}
 	    </tr>
+            {{ end }}
             {{ end }}
           </table>
           <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>

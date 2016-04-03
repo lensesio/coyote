@@ -40,6 +40,7 @@ func main() {
 	var Results []Result
 	var succesful = 0
 	var errors = 0
+	var totalTime = 0.0
 
 	// Read yml configuration
 	err = yaml.Unmarshal(configData, &config)
@@ -95,7 +96,7 @@ func main() {
 			}
 			t.Time = elapsed.Seconds()
 			Results = append(Results, t)
-
+			totalTime += t.Time
 		}
 	}
 
@@ -132,7 +133,21 @@ func main() {
 
 		} else {
 			h := &bytes.Buffer{}
-			err = t.ExecuteTemplate(h, "template.html", Results)
+			data := struct {
+				Results    []Result
+				Errors     int
+				Successful int
+				TotalTests int
+				TotalTime  float64
+			}{
+				Results,
+				errors,
+				succesful,
+				errors + succesful,
+				totalTime,
+			}
+
+			err = t.ExecuteTemplate(h, "template.html", data)
 			// err = t.Execute(h, Results)
 			if err != nil {
 				log.Println(err)
