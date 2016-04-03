@@ -5,6 +5,100 @@
 
     </head>
     <body>
+
+        <div id="pieChart" style="display:inline;"></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
+        <script src="https://storage.googleapis.com/artifacts-landoop/d3pie.min.js"></script>
+        <script>
+         var pie = new d3pie("pieChart", {
+             "header": {
+                 "title": {
+                     "text": "Box Tests",
+                     "color": "#fffefe",
+                     "fontSize": 34,
+                     "font": "courier"
+            },
+                 "subtitle": {
+                     "text": "coyote tester",
+                     "color": "#999999",
+                     "fontSize": 12,
+                     "font": "courier"
+                 },
+                 "location": "pie-center",
+                 "titleSubtitlePadding": 10
+             },
+            "footer": {
+                "text": "Landoop Box Tests.",
+                "color": "#999999",
+                "fontSize": 10,
+            "font": "open sans",
+                "location": "bottom-left"
+            },
+             "size": {
+                 "canvasHeight": 350,
+                 "pieInnerRadius": "75%",
+                 "pieOuterRadius": "95%"
+             },
+             "data": {
+                 "sortOrder": "label-desc",
+                 "content": [
+                     {
+                         "label": "failed",
+                         "value": {{ .Errors }},
+                         "color": "#e21515"
+                     },
+                     {
+                         "label": "passed",
+                         "value": {{ .Successful }},
+                         "color": "#64a61f"
+                     }
+                 ]
+             },
+             "labels": {
+                 "outer": {
+                     "format": "label-percentage1",
+                     "pieDistance": 20
+                 },
+                 "inner": {
+                     "format": "none"
+                 },
+                 "mainLabel": {
+                     "color": "#ffffff",
+                     "fontSize": 14
+                 },
+                 "percentage": {
+                     "color": "#919191",
+                     "fontSize": 14,
+                     "decimalPlaces": 0
+                 },
+                 "value": {
+                     "color": "#cccc43",
+                     "fontSize": 14
+                 },
+                 "lines": {
+                     "enabled": true,
+                     "color": "#777777"
+                 },
+                 "truncation": {
+                     "enabled": true
+                 }
+             },
+             "effects": {
+                 "pullOutSegmentOnClick": {
+                     "effect": "linear",
+                     "speed": 400,
+                     "size": 8
+                 }
+             },
+             "misc": {
+                 "colors": {
+                     "background": "#2b2b2b",
+                     "segmentStroke": "#efe3e3"
+                 }
+             }
+         });
+        </script>
+
         <style type="text/css">
          body {
              font-family: "Helvetica Neue", Helvetica, Arial;
@@ -159,7 +253,7 @@
                     <div class="cell">
                         {{ $iv.Exit }}
                     </div>
-                    <div class="cell" style="line-height:1em;height:auto;">
+                    <div class="cell" style="line-height:1em;height:1em;">
                         {{ $len := len $iv.Command }}{{ if gt $len 0 }}{{ $x := splitString $iv.Command }}
                         {{ if showmore $x }}
                         <a href="" title='{{ range $x }}{{ . }}</br>{{ end }}'>{{ index $x 1 }}</a>
@@ -168,14 +262,14 @@
                         {{ end }}
                         {{ end }}
                     </div>
-                    <div class="cell" style="line-height:1em;height:auto;">
+                    <div class="cell" style="line-height:1em;height:1em;">
                         {{ if showmore $iv.Stdout }}
                         <a href="" title='{{ range $iv.Stdout }}{{ . }}</br>{{ end }}'>{{ index $iv.Stdout 1 }}</a>
                         {{ else }}
                         {{ range $iv.Stdout }}{{ . }}</br>{{ end }}
                         {{ end }}
                     </div>
-                    <div class="cell" style="line-height:1em;height:auto;">
+                    <div class="cell" style="line-height:1em;height:1em;">
                         {{ if showmore $iv.Stderr }}
                         <a href="" title='{{ range $iv.Stderr }}{{ . }}</br>{{ end }}'>{{ index $iv.Stderr 1 }}</a>
                         {{ else }}
@@ -245,10 +339,10 @@
              }
              setTimeout(callback(), 5000);
 
-             //if ($('a').is(':focus')) { // if input is focused 
+             //if ($('a').is(':focus')) { // if input is focused
              ui.tooltip.preventDefault(); //prevent the tooltip's default behavior
              //}
-         }).focusout(function () { // on focus out 
+         }).focusout(function () { // on focus out
              // $('a').tooltip('close'); // close the tooltip
          });
         </script>

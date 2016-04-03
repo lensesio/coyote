@@ -56,7 +56,7 @@ func main() {
 			Results:   results,
 			Passed:    0,
 			Errors:    0,
-			Total:     len(v.Entries),
+			Total:     0,
 			TotalTime: 0.0,
 		}
 
@@ -119,6 +119,7 @@ func main() {
 				totalTime += t.Time
 			}
 		}
+		resultGroup.Total = resultGroup.Passed + resultGroup.Passed
 		passed += resultGroup.Passed
 		errors += resultGroup.Errors
 		totalTime += resultGroup.TotalTime
