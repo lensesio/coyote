@@ -119,8 +119,8 @@ func main() {
 			return strings.Split(s, "\n")
 		},
 	}
-	// t, err := template.New("").Funcs(funcMap).ParseFiles("table.template")
-	t, err := template.New("output").Funcs(funcMap).Parse(html)
+	t, err := template.New("").Funcs(funcMap).ParseFiles("template.html")
+	//t, err := template.New("output").Funcs(funcMap).Parse("")
 
 	if err != nil {
 		log.Println(err)
@@ -132,7 +132,8 @@ func main() {
 
 		} else {
 			h := &bytes.Buffer{}
-			err = t.Execute(h, Results)
+			err = t.ExecuteTemplate(h, "template.html", Results)
+			// err = t.Execute(h, Results)
 			if err != nil {
 				log.Println(err)
 			}
