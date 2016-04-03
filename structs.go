@@ -10,6 +10,11 @@ type Entry struct {
 	EnvVars []string `yaml:"env",omitempty`
 }
 
+type EntryGroup struct {
+	Name    string  `yaml:"name"`
+	Entries []Entry `yaml:"entries"`
+}
+
 type Result struct {
 	Name    string
 	Command string
@@ -17,5 +22,14 @@ type Result struct {
 	Time    float64
 	Stdout  []string
 	Stderr  []string
-	Error   string
+	Exit    string
+}
+
+type ResultGroup struct {
+	Name      string
+	Results   []Result
+	Passed    int
+	Errors    int
+	Total     int
+	TotalTime float64
 }

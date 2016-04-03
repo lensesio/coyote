@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	shellwords "github.com/mattn/go-shellwords"
@@ -36,68 +36,93 @@ func main() {
 		logger.Fatalln(err)
 	}
 
-	var config []Entry
-	var Results []Result
-	var succesful = 0
+	var entriesGroups []EntryGroup
+	var resultsGroups []ResultGroup
+	var passed = 0
 	var errors = 0
 	var totalTime = 0.0
 
 	// Read yml configuration
-	err = yaml.Unmarshal(configData, &config)
+	err = yaml.Unmarshal(configData, &entriesGroups)
 	if err != nil {
 		logger.Fatalf("Error reading configuration file: %v", err)
 	}
 
-	// For entries in configuration
-	for _, v := range config {
-		args, err := shellwords.Parse(v.Command)
-		if err != nil {
-			log.Printf("Error when parsing command %s for %s.\n", v.Command, v.Name)
+	// For groups in configuration
+	for _, v := range entriesGroups {
+		var results []Result
+		var resultGroup = ResultGroup{
+			Name:      v.Name,
+			Results:   results,
+			Passed:    0,
+			Errors:    0,
+			Total:     len(v.Entries),
+			TotalTime: 0.0,
 		}
 
-		cmd := exec.Command(args[0], args[1:]...)
-		if len(v.WorkDir) > 0 {
-			cmd.Dir = v.WorkDir
-		}
-		if len(v.Stdin) > 0 {
-			cmd.Stdin = strings.NewReader(v.Stdin)
-		}
-		cmd.Env = os.Environ()
-		if len(v.EnvVars) > 0 {
-			for _, v := range v.EnvVars {
-				cmd.Env = append(cmd.Env, v)
+		log.Printf("Starting processing group '%s'.\n", v.Name)
+		// For entries in group
+		for _, v := range v.Entries {
+			args, err := shellwords.Parse(v.Command)
+			if err != nil {
+				log.Printf("Error when parsing command %s for %s.\n", v.Command, v.Name)
 			}
-		}
-		cmdOut := &bytes.Buffer{}
-		cmdErr := &bytes.Buffer{}
-		cmd.Stdout = cmdOut
-		cmd.Stderr = cmdErr
 
-		start := time.Now()
-		//out, err := cmd.CombinedOutput()
-		err = cmd.Run()
-		elapsed := time.Since(start)
-		if err != nil {
-			log.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(string(cmdErr.Bytes())))
+			cmd := exec.Command(args[0], args[1:]...)
+			if len(v.WorkDir) > 0 {
+				cmd.Dir = v.WorkDir
+			}
+			if len(v.Stdin) > 0 {
+				cmd.Stdin = strings.NewReader(v.Stdin)
+			}
+			cmd.Env = os.Environ()
+			if len(v.EnvVars) > 0 {
+				for _, v := range v.EnvVars {
+					cmd.Env = append(cmd.Env, v)
+				}
+			}
+			cmdOut := &bytes.Buffer{}
+			cmdErr := &bytes.Buffer{}
+			cmd.Stdout = cmdOut
+			cmd.Stderr = cmdErr
 
-		} else {
-			log.Printf("Success, command '%s', test '%s'. Stdout: %s\n", v.Command, v.Name, strconv.Quote(string(cmdOut.Bytes())))
-		}
+			start := time.Now()
+			//out, err := cmd.CombinedOutput()
+			err = cmd.Run()
+			elapsed := time.Since(start)
 
-		if v.NoLog == false {
-			var t = Result{Name: v.Name, Command: v.Command, Stdout: strings.Split(string(cmdOut.Bytes()), "\n"), Stderr: strings.Split(string(cmdErr.Bytes()), "\n")}
-			if err == nil {
-				t.Status = "ok"
-				succesful++
+			stdout := string(cmdOut.Bytes())
+			stderr := string(cmdErr.Bytes())
+			if err != nil {
+				log.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
+
 			} else {
-				t.Status = "error"
-				t.Error = err.Error()
-				errors++
+				log.Printf("Success, command '%s', test '%s'. Stdout: %s\n", v.Command, v.Name, strconv.Quote(stdout))
 			}
-			t.Time = elapsed.Seconds()
-			Results = append(Results, t)
-			totalTime += t.Time
+
+			if v.NoLog == false {
+				var t = Result{Name: v.Name, Command: v.Command, Stdout: strings.Split(stdout, "\n"), Stderr: strings.Split(stderr, "\n")}
+				if err == nil {
+					t.Status = "ok"
+					t.Exit = "0"
+					resultGroup.Passed++
+					//succesful++
+				} else {
+					t.Status = "error"
+					t.Exit = err.Error()
+					resultGroup.Errors++
+					//errors++
+				}
+				t.Time = elapsed.Seconds()
+				resultGroup.Results = append(resultGroup.Results, t)
+				//resultGroup.TotalTime += t.Time
+				totalTime += t.Time
+			}
 		}
+		passed += resultGroup.Passed
+		errors += resultGroup.Errors
+		totalTime += resultGroup.TotalTime
+		resultsGroups = append(resultsGroups, resultGroup)
 	}
 
 	funcMap := template.FuncMap{
@@ -119,6 +144,29 @@ func main() {
 			}
 			return strings.Split(s, "\n")
 		},
+		"rotateColor": func(i int) string {
+			v := i % 3
+			switch v {
+			case 1:
+				return "row header green"
+			case 2:
+				return "row header blue"
+			case 0:
+				return "row header"
+			}
+			return "row header"
+		},
+		"colorStatus": func(s string) string {
+			switch s {
+			case "error":
+				return "red"
+			case "ok":
+				return "green"
+			default:
+				return ""
+			}
+			return ""
+		},
 	}
 	t, err := template.New("").Funcs(funcMap).ParseFiles("template.html")
 	//t, err := template.New("output").Funcs(funcMap).Parse("")
@@ -134,16 +182,16 @@ func main() {
 		} else {
 			h := &bytes.Buffer{}
 			data := struct {
-				Results    []Result
+				Results    []ResultGroup
 				Errors     int
 				Successful int
 				TotalTests int
 				TotalTime  float64
 			}{
-				Results,
+				resultsGroups,
 				errors,
-				succesful,
-				errors + succesful,
+				passed,
+				errors + passed,
 				totalTime,
 			}
 
@@ -157,7 +205,7 @@ func main() {
 
 	}
 
-	j, err := json.Marshal(Results)
+	j, err := json.Marshal(resultsGroups)
 	fmt.Println(string(j))
 	if errors == 0 {
 		fmt.Println("no errors")

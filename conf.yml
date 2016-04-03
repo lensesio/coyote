@@ -1,10 +1,12 @@
-- name: ls
-  command: |
-    ls
-    -lR
-    .
-- name: echo
-  command: echo hello
-- name: error
-  command: ls /root
+- name: test
+  entries:
+    - name: ls
+      command: |
+        ls
+        -lR
+        .
+    - name: echo
+      command: echo hello
+    - name: error
+      command: ls /root
 
