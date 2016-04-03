@@ -125,6 +125,7 @@ func main() {
 		resultsGroups = append(resultsGroups, resultGroup)
 	}
 
+	rotateColorCanary := 0
 	funcMap := template.FuncMap{
 		"isEven": func(i int) bool {
 			if i%2 == 0 {
@@ -174,7 +175,8 @@ func main() {
 				"#44b9af",
 				"#bca349",
 			}
-			v := (ext + int) % (len(colors) - 1)
+			v := rotateColorCanary % (len(colors) - 1)
+			rotateColorCanary++
 			return colors[v]
 		},
 		"colorStatus": func(s string) string {

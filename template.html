@@ -103,7 +103,7 @@
          var pie = new d3pie("testTimes", {
              "header": {
                  "title": {
-                     "text": "{{ .TotalTime | printf "%.2f" }} secs",
+                     "text": "{{ .TotalTime | printf "%.0f" }} s",
                      "color": "#fffefe",
                      "fontSize": 34,
                      "font": "sans"
