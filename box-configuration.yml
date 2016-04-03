@@ -1,26 +1,26 @@
 - name: Clone Landoop Intro Repo
   command: git clone https://gitlab.com/landoop/landoop-intro.git
-  workdir: /home/marios
+  workdir: /home/coyote
 
 - name: Hadoop Run Jar Tutorial 1, hdfs put
   command: hadoop fs -put ../README.md input.md
-  workdir: /home/marios/landoop-intro/Hadoop-101
+  workdir: /home/coyote/landoop-intro/Hadoop-101
 
 - name: Hadoop Tutorial 1, wordcount
   command: hadoop jar hadoop-examples.jar wordcount input.md results
-  workdir: /home/marios/landoop-intro/Hadoop-101
+  workdir: /home/coyote/landoop-intro/Hadoop-101
 
 - name: Hadoop Tutorial 2, build code
   command: hadoop com.sun.tools.javac.Main WordCount.java
-  workdir: /home/marios/landoop-intro/Hadoop-102
+  workdir: /home/coyote/landoop-intro/Hadoop-102
 
 - name: Hadoop Tutorial 2, create jar
   command: jar cf wc.jar WordCount.class WordCount$IntSumReducer.class WordCount$TokenizerMapper.class
-  workdir: /home/marios/landoop-intro/Hadoop-102
+  workdir: /home/coyote/landoop-intro/Hadoop-102
 
 - name: Hadoop Tutorial 2, run jar
   command: hadoop jar wc.jar WordCount input.md results-2
-  workdir: /home/marios/landoop-intro/Hadoop-102
+  workdir: /home/coyote/landoop-intro/Hadoop-102
 
 - command: hadoop fs -rm -r input.md results results-2
   nolog: true
@@ -35,7 +35,7 @@
   nolog: true
 
 - name: Sqoop Tutorial, hive create db
-  command: hive -e "CREATE DATABASE marios_tutorial"
+  command: hive -e "CREATE DATABASE coyote_tutorial"
 
 - name: Sqoop Tutorial, import into hive
   command: |
@@ -43,11 +43,11 @@
                  --username data --password base
                  --query 'SELECT * FROM Orders WHERE $CONDITIONS' --m 1
                  --target-dir temp-orders --create-hive-table
-                 --hive-table "marios_tutorial.orders" --hive-import
+                 --hive-table "coyote_tutorial.orders" --hive-import
                  --hive-overwrite --create-hive-table
 
 - name: Sqoop Tutorial, drop hive database
-  command: hive -e "USE marios_tutorial; DROP TABLE orders; DROP DATABASE marios_tutorial"
+  command: hive -e "USE coyote_tutorial; DROP TABLE orders; DROP DATABASE coyote_tutorial"
 
 - name: Cloudera Kafka Env Vars (no fail)
   command: |
@@ -71,5 +71,5 @@
     /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
     --producer-props bootstrap.servers="cloudera.landoop.com:29092"
 
-- command: rm -rf /home/marios/landoop-intro
+- command: rm -rf /home/coyote/landoop-intro
   nolog: true
