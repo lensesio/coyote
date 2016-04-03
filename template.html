@@ -22,14 +22,14 @@
                  "subtitle": {
                      "text": "box-cdh tests",
                      "color": "#999999",
-                     "fontSize": 12,
-                     "font": "courier"
+                     "fontSize": 14,
+                     "font": "sans"
                  },
                  "location": "pie-center",
                  "titleSubtitlePadding": 10
              },
             "footer": {
-                "text": "Coyote-tester, part of Landoop™ test-suite..",
+                "text": "Coyote-tester, part of Landoop™ test-suite.",
                 "color": "#999999",
                 "fontSize": 10,
             "font": "open sans",
@@ -103,16 +103,16 @@
          var pie = new d3pie("testTimes", {
              "header": {
                  "title": {
-                     "text": "{{ .TotalTime | printf "%.1f" }} secs",
+                     "text": "{{ .TotalTime | printf "%.2f" }} secs",
                      "color": "#fffefe",
                      "fontSize": 34,
                      "font": "sans"
             },
                  "subtitle": {
-                     "text": "test times",
+                     "text": "total time",
                      "color": "#999999",
-                     "fontSize": 12,
-                     "font": "courier"
+                     "fontSize": 14,
+                     "font": "sans"
                  },
                  "location": "pie-center",
                  "titleSubtitlePadding": 10
@@ -126,18 +126,18 @@
             },
              "size": {
                  "canvasHeight": 375,
-                 "canvasWidth": 600,
+                 "canvasWidth": 1000,
                  "pieInnerRadius": "72%",
-                 "pieOuterRadius": "92%"
+                 "pieOuterRadius": "85%"
              },
              "data": {
                  "sortOrder": "label-desc",
                  "content": [
                      {{ range $k, $v := .Results }}
-                     {{ range $ik, $v := .Results }}
+                     {{ range $ik, $iv := .Results }}
                      {
-                         "label": "{{ $v.Name }}",
-                         "value": {{ $.TotalTime }},
+                         "label": "{{ $v.Name }}, {{ $iv.Name }}",
+                         "value": {{ $iv.Time }},
                          "color": "{{ rotateColorCharts $k $ik }}"
                      },
                      {{ end }}
@@ -154,16 +154,16 @@
                  },
                  "mainLabel": {
                      "color": "#ffffff",
-                     "fontSize": 14
+                     "fontSize": 12
                  },
                  "percentage": {
                      "color": "#919191",
-                     "fontSize": 14,
+                     "fontSize": 12,
                      "decimalPlaces": 1
                  },
                  "value": {
                      "color": "#cccc43",
-                     "fontSize": 14
+                     "fontSize": 12
                  },
                  "lines": {
                      "enabled": true,
