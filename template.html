@@ -35,9 +35,9 @@
                 "location": "bottom-left"
             },
              "size": {
-                 "canvasHeight": 350,
-                 "pieInnerRadius": "75%",
-                 "pieOuterRadius": "95%"
+                 "canvasHeight": 375,
+                 "pieInnerRadius": "72%",
+                 "pieOuterRadius": "92%"
              },
              "data": {
                  "sortOrder": "label-desc",
@@ -57,23 +57,23 @@
              "labels": {
                  "outer": {
                      "format": "label-percentage1",
-                     "pieDistance": 20
+                     "pieDistance": 25
                  },
                  "inner": {
                      "format": "none"
                  },
                  "mainLabel": {
                      "color": "#ffffff",
-                     "fontSize": 14
+                     "fontSize": 16
                  },
                  "percentage": {
                      "color": "#919191",
-                     "fontSize": 14,
-                     "decimalPlaces": 0
+                     "fontSize": 16,
+                     "decimalPlaces": 1
                  },
                  "value": {
                      "color": "#cccc43",
-                     "fontSize": 14
+                     "fontSize": 16
                  },
                  "lines": {
                      "enabled": true,
@@ -93,7 +93,7 @@
              "misc": {
                  "colors": {
                      "background": "#2b2b2b",
-                     "segmentStroke": "#efe3e3"
+                     "segmentStroke": "#f6f6f6"
                  }
              }
          });
@@ -256,7 +256,7 @@
                     <div class="cell" style="line-height:1em;height:1em;">
                         {{ $len := len $iv.Command }}{{ if gt $len 0 }}{{ $x := splitString $iv.Command }}
                         {{ if showmore $x }}
-                        <a href="" title='{{ range $x }}{{ . }}</br>{{ end }}'>{{ index $x 1 }}</a>
+                        <a href="" title='{{ range $x }}{{ . }}</br>{{ end }}'>{{ returnFirstLine $x }}</a>
                         {{ else }}
                         {{ range $x }}{{ . }}</br>{{ end }}
                         {{ end }}
@@ -264,14 +264,14 @@
                     </div>
                     <div class="cell" style="line-height:1em;height:1em;">
                         {{ if showmore $iv.Stdout }}
-                        <a href="" title='{{ range $iv.Stdout }}{{ . }}</br>{{ end }}'>{{ index $iv.Stdout 1 }}</a>
+                        <a href="" title='{{ range $iv.Stdout }}{{ . }}</br>{{ end }}'>{{ returnFirstLine $iv.Stdout }}</a>
                         {{ else }}
                         {{ range $iv.Stdout }}{{ . }}</br>{{ end }}
                         {{ end }}
                     </div>
                     <div class="cell" style="line-height:1em;height:1em;">
                         {{ if showmore $iv.Stderr }}
-                        <a href="" title='{{ range $iv.Stderr }}{{ . }}</br>{{ end }}'>{{ index $iv.Stderr 1 }}</a>
+                        <a href="" title='{{ range $iv.Stderr }}{{ . }}</br>{{ end }}'>{{ returnFirstLine $iv.Stderr }}</a>
                         {{ else }}
                         {{ range $iv.Stderr }}{{ . }}</br>{{ end }}
                         {{ end }}

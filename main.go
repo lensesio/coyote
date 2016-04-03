@@ -115,11 +115,10 @@ func main() {
 				}
 				t.Time = elapsed.Seconds()
 				resultGroup.Results = append(resultGroup.Results, t)
-				//resultGroup.TotalTime += t.Time
-				totalTime += t.Time
+				resultGroup.TotalTime += t.Time
 			}
 		}
-		resultGroup.Total = resultGroup.Passed + resultGroup.Passed
+		resultGroup.Total = resultGroup.Passed + resultGroup.Errors
 		passed += resultGroup.Passed
 		errors += resultGroup.Errors
 		totalTime += resultGroup.TotalTime
@@ -167,6 +166,11 @@ func main() {
 				return ""
 			}
 			return ""
+		},
+		"returnFirstLine": func(s []string) string {
+			r := strings.Split(s[0], "<br>")
+			r = strings.Split(r[0], "\n")
+			return r[0]
 		},
 	}
 	t, err := template.New("").Funcs(funcMap).ParseFiles("template.html")
