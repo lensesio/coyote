@@ -32,13 +32,12 @@
               <th class="tg-9hbo">StdOut</th>
               <th class="tg-9hbo">StdErr</th>
             </tr>
-            {{ with .Results }}
-            {{ range $k, $v := . }}
+            {{ range $k, $v := .Results }}
 	    <tr>
               {{ if isEven $k }}
 	      <td class="tg-j2zy">{{ $v.Name }}</td>
 	      <td class="{{ if eq $v.Status "ok"}}tg-y0xi{{ else }}tg-b5xm{{ end }}">{{ $v.Status }}</td>
-	      <td class="tg-zczf">{{ $v.Time | printf "%.3f" }}</td>
+	      <td class="tg-zczf">{{ $v.Time | printf "%.2f" }}</td>
 	      <td class="tg-zczf">{{ $v.Error }}</td>
 	      <td class="tg-zczf">{{ $len := len $v.Command }}{{ if gt $len 0 }}{{ $x := splitString $v.Command }}
                 {{ if showmore $x }}
@@ -89,7 +88,6 @@
               </td>
               {{ end }}
 	    </tr>
-            {{ end }}
             {{ end }}
           </table>
           <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
