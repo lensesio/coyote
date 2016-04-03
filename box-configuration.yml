@@ -1,75 +1,81 @@
-- name: Clone Landoop Intro Repo
-  command: git clone https://gitlab.com/landoop/landoop-intro.git
-  workdir: /home/coyote
+- name: Hadoop Tutorial
+  entries:
+    - name: Clone Landoop Intro Repo
+      command: git clone https://gitlab.com/landoop/landoop-intro.git
+      workdir: /home/coyote
 
-- name: Hadoop Run Jar Tutorial 1, hdfs put
-  command: hadoop fs -put ../README.md input.md
-  workdir: /home/coyote/landoop-intro/Hadoop-101
+    - name: Hadoop Run Jar Tutorial 1, hdfs put
+      command: hadoop fs -put ../README.md input.md
+      workdir: /home/coyote/landoop-intro/Hadoop-101
 
-- name: Hadoop Tutorial 1, wordcount
-  command: hadoop jar hadoop-examples.jar wordcount input.md results
-  workdir: /home/coyote/landoop-intro/Hadoop-101
+    - name: Hadoop Tutorial 1, wordcount
+      command: hadoop jar hadoop-examples.jar wordcount input.md results
+      workdir: /home/coyote/landoop-intro/Hadoop-101
 
-- name: Hadoop Tutorial 2, build code
-  command: hadoop com.sun.tools.javac.Main WordCount.java
-  workdir: /home/coyote/landoop-intro/Hadoop-102
+    - name: Hadoop Tutorial 2, build code
+      command: hadoop com.sun.tools.javac.Main WordCount.java
+      workdir: /home/coyote/landoop-intro/Hadoop-102
 
-- name: Hadoop Tutorial 2, create jar
-  command: jar cf wc.jar WordCount.class WordCount$IntSumReducer.class WordCount$TokenizerMapper.class
-  workdir: /home/coyote/landoop-intro/Hadoop-102
+    - name: Hadoop Tutorial 2, create jar
+      command: jar cf wc.jar WordCount.class WordCount$IntSumReducer.class WordCount$TokenizerMapper.class
+      workdir: /home/coyote/landoop-intro/Hadoop-102
 
-- name: Hadoop Tutorial 2, run jar
-  command: hadoop jar wc.jar WordCount input.md results-2
-  workdir: /home/coyote/landoop-intro/Hadoop-102
+    - name: Hadoop Tutorial 2, run jar
+      command: hadoop jar wc.jar WordCount input.md results-2
+      workdir: /home/coyote/landoop-intro/Hadoop-102
 
-- command: hadoop fs -rm -r input.md results results-2
-  nolog: true
+    - command: hadoop fs -rm -r input.md results results-2
+      nolog: true
 
-- name: Sqoop Tutorial, import
-  command: |
-    sqoop-import --connect jdbc:mysql://mariadb.landoop.com/northwind
-                 --username data --password base
-                 --table Orders --m 1
+- name: Sqoop Tutorial
+  entries:
+    - name: Sqoop Tutorial, import
+      command: |
+        sqoop-import --connect jdbc:mysql://mariadb.landoop.com/northwind
+                     --username data --password base
+                     --table Orders --m 1
 
-- command: hadoop fs -rm -r Orders
-  nolog: true
+    - command: hadoop fs -rm -r Orders
+      nolog: true
 
-- name: Sqoop Tutorial, hive create db
-  command: hive -e "CREATE DATABASE coyote_tutorial"
+    - name: Sqoop Tutorial, hive create db
+      command: hive -e "CREATE DATABASE coyote_tutorial"
 
-- name: Sqoop Tutorial, import into hive
-  command: |
-    sqoop import -jt local --connect jdbc:mysql://mariadb.landoop.com/northwind
-                 --username data --password base
-                 --query 'SELECT * FROM Orders WHERE $CONDITIONS' --m 1
-                 --target-dir temp-orders --create-hive-table
-                 --hive-table "coyote_tutorial.orders" --hive-import
-                 --hive-overwrite --create-hive-table
+    - name: Sqoop Tutorial, import into hive
+      command: |
+        sqoop import -jt local --connect jdbc:mysql://mariadb.landoop.com/northwind
+                     --username data --password base
+                     --query 'SELECT * FROM Orders WHERE $CONDITIONS' --m 1
+                     --target-dir temp-orders --create-hive-table
+                     --hive-table "coyote_tutorial.orders" --hive-import
+                     --hive-overwrite --create-hive-table
 
-- name: Sqoop Tutorial, drop hive database
-  command: hive -e "USE coyote_tutorial; DROP TABLE orders; DROP DATABASE coyote_tutorial"
+    - name: Sqoop Tutorial, drop hive database
+      command: hive -e "USE coyote_tutorial; DROP TABLE orders; DROP DATABASE coyote_tutorial"
 
-- name: Cloudera Kafka Env Vars (no fail)
-  command: |
-    bash -c '
-    echo -e "\
-    Zookeeper (ZK) $ZK\n\
-    Broker List (BL) $BL\n\
-    Bootstrap Server (BS) $BS\n\
-    JAAS Login Configuration File (JAAS) $JAAS\n\
-    producer.properties path (PROD_PR) $PROD_PR\n\
-    consumer.properties path (CONS_PR) $CONS_PR\n\
-    KAFKA_OPTS (KAFKA_OPTS) $KAFKA_OPTS"'
+- name: Kafka Tests
+  entries:
+    - name: Cloudera Kafka Env Vars (no fail)
+      command: |
+        bash -c '
+        echo -e "\
+        Zookeeper (ZK) $ZK\n\
+        Broker List (BL) $BL\n\
+        Bootstrap Server (BS) $BS\n\
+        JAAS Login Configuration File (JAAS) $JAAS\n\
+        producer.properties path (PROD_PR) $PROD_PR\n\
+        consumer.properties path (CONS_PR) $CONS_PR\n\
+        KAFKA_OPTS (KAFKA_OPTS) $KAFKA_OPTS"'
 
-- name: Cloudera Kafka Performance Test (Kerberos)
-  command: |
-    /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
-    --producer-props bootstrap.servers="cloudera.landoop.com:9092" security.protocol=SASL_PLAINTEXT
+    - name: Cloudera Kafka Performance Test (Kerberos)
+      command: |
+        /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
+        --producer-props bootstrap.servers="cloudera.landoop.com:9092" security.protocol=SASL_PLAINTEXT
 
-- name: Confluent Kafka Performance Test (Non-Kerberos)
-  command: |
-    /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
-    --producer-props bootstrap.servers="cloudera.landoop.com:29092"
+    - name: Confluent Kafka Performance Test (Non-Kerberos)
+      command: |
+        /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
+        --producer-props bootstrap.servers="cloudera.landoop.com:29092"
 
-- command: rm -rf /home/coyote/landoop-intro
-  nolog: true
+    - command: rm -rf /home/coyote/landoop-intro
+      nolog: true
