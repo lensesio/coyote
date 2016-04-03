@@ -151,7 +151,7 @@
                         {{ $iv.Name }}
                     </div>
                     <div class="cell {{ colorStatus $iv.Status }} center">
-                         {{ $iv.Status }}
+                         {{ if eq $iv.Status "ok" }}&#10004;{{ else }}&#10006;{{ end }}
                     </div>
                     <div class="cell">
                         {{ $iv.Time | printf "%.2f" }}
