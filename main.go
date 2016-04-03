@@ -156,6 +156,27 @@ func main() {
 			}
 			return "row header"
 		},
+		"rotateColorCharts": func(ext, int int) string {
+			colors := []string{
+				"#2383c1",
+				"#64a61f",
+				"#7b6788",
+				"#a05c56",
+				"#961919",
+				"#d8d239",
+				"#e98125",
+				"#d0743c",
+				"#635122",
+				"#6ada6a",
+				"#0b6197",
+				"#7c9058",
+				"#207f32",
+				"#44b9af",
+				"#bca349",
+			}
+			v := (ext + int) % (len(colors) - 1)
+			return colors[v]
+		},
 		"colorStatus": func(s string) string {
 			switch s {
 			case "error":
