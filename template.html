@@ -118,8 +118,8 @@
 
         <div class="wrapper">
 
-            {{ range $k, $v := .Results }}
             <div class="table">
+            {{ range $k, $v := .Results }}
 
                 <div class="{{ rotateColor $k }}">
                     <div class="cell">
@@ -159,7 +159,7 @@
                     <div class="cell">
                         {{ $iv.Exit }}
                     </div>
-                    <div class="cell">
+                    <div class="cell" style="line-height:1em;height:auto;">
                         {{ $len := len $iv.Command }}{{ if gt $len 0 }}{{ $x := splitString $iv.Command }}
                         {{ if showmore $x }}
                         <a href="" title='{{ range $x }}{{ . }}</br>{{ end }}'>{{ index $x 1 }}</a>
@@ -168,14 +168,14 @@
                         {{ end }}
                         {{ end }}
                     </div>
-                    <div class="cell">
+                    <div class="cell" style="line-height:1em;height:auto;">
                         {{ if showmore $iv.Stdout }}
                         <a href="" title='{{ range $iv.Stdout }}{{ . }}</br>{{ end }}'>{{ index $iv.Stdout 1 }}</a>
                         {{ else }}
                         {{ range $iv.Stdout }}{{ . }}</br>{{ end }}
                         {{ end }}
                     </div>
-                    <div class="cell">
+                    <div class="cell" style="line-height:1em;height:auto;">
                         {{ if showmore $iv.Stderr }}
                         <a href="" title='{{ range $iv.Stderr }}{{ . }}</br>{{ end }}'>{{ index $iv.Stderr 1 }}</a>
                         {{ else }}
@@ -198,9 +198,20 @@
                         {{ $v.TotalTime | printf "%.2f" }} seconds
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="cell skip"></div>
+                    <div class="cell skip"></div>
+                    <div class="cell skip"></div>
+                    <div class="cell skip"></div>
+                    <div class="cell skip"></div>
+                    <div class="cell skip"></div>
+                    <div class="cell skip"></div>
+                </div>
+            {{ end }}
             </div>
 
-            {{ end }}
+
         </div>
 
         <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>

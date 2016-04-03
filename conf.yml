@@ -10,3 +10,9 @@
     - name: error
       command: ls /root
 
+
+- name: more tests, oh yeah!
+  entries:
+    - name: base64
+      command: |
+        bash -c 'echo Hello World | base64'
