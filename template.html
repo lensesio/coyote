@@ -232,7 +232,7 @@
                         Command
                     </div>
                     <div class="cell">
-                        Stdout
+                        StdOutput
                     </div>
                     <div class="cell">
                         StdError
@@ -253,27 +253,27 @@
                     <div class="cell">
                         {{ $iv.Exit }}
                     </div>
-                    <div class="cell" style="line-height:1em;height:1em;">
+                    <div class="cell" style="overflow:hidden;">
                         {{ $len := len $iv.Command }}{{ if gt $len 0 }}{{ $x := splitString $iv.Command }}
                         {{ if showmore $x }}
-                        <a href="" title='{{ range $x }}{{ . }}</br>{{ end }}'>{{ returnFirstLine $x }}</a>
+                        <a href="" title='{{ range $x }}{{ . | html }}</br>{{ end }}'>{{ returnFirstLine $x }}</a>
                         {{ else }}
-                        {{ range $x }}{{ . }}</br>{{ end }}
+                        {{ range $x }}{{ . | html }}</br>{{ end }}
                         {{ end }}
                         {{ end }}
                     </div>
-                    <div class="cell" style="line-height:1em;height:1em;">
-                        {{ if showmore $iv.Stdout }}
-                        <a href="" title='{{ range $iv.Stdout }}{{ . }}</br>{{ end }}'>{{ returnFirstLine $iv.Stdout }}</a>
-                        {{ else }}
-                        {{ range $iv.Stdout }}{{ . }}</br>{{ end }}
+                    <div class="cell" style="overflow:hidden;">
+                        {{ $len := len $iv.Stdout }}{{ if gt $len 2 }}
+                        <a href="" title='{{ range $iv.Stdout }}{{ . | html }}</br>{{ end }}'>show</a>
+                        {{ else if eq $len 2 }}
+                        {{ index $iv.Stdout 0 | html }}
                         {{ end }}
                     </div>
-                    <div class="cell" style="line-height:1em;height:1em;">
-                        {{ if showmore $iv.Stderr }}
-                        <a href="" title='{{ range $iv.Stderr }}{{ . }}</br>{{ end }}'>{{ returnFirstLine $iv.Stderr }}</a>
-                        {{ else }}
-                        {{ range $iv.Stderr }}{{ . }}</br>{{ end }}
+                    <div class="cell" style="overflow:hidden;">
+                        {{ $len := len $iv.Stderr }}{{ if gt $len 2 }}
+                        <a href="" title='{{ range $iv.Stderr }}{{ . | html }}</br>{{ end }}'>show</a>
+                        {{ else if eq $len 2 }}
+                        {{ index $iv.Stderr 0 | html }}
                         {{ end }}
                     </div>
                 </div>
