@@ -21,7 +21,7 @@
           <div>
               <h2> Tests passed: {{ .Successful }} out of {{ .TotalTests }}.</h2>
               <h2> Errors: {{ .Errors }}</h2>
-              <h2> Time Elapsed: {{ .TotalTime }} seconds</h2>
+              <h2> Time Elapsed: {{ .TotalTime | printf "%3.f" }} seconds</h2>
           <table class="tg">
             <tr>
               <th class="tg-9hbo">Test</th>
