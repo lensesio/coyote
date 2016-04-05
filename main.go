@@ -184,7 +184,8 @@ func main() {
 			case "error":
 				return "red"
 			case "ok":
-				return "green"
+				// return "green" // green disabled because status ok should be expected
+				return ""
 			default:
 				return ""
 			}

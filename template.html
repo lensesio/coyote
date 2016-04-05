@@ -133,7 +133,8 @@
              "data": {
                  "sortOrder": "label-desc",
                  "smallSegmentGrouping": {
-                     "enabled": true
+                     "enabled": true,
+                     "value": 3
                  },
                  "content": [
                      {{ range $k, $v := .Results }}
@@ -194,7 +195,7 @@
 
         <style type="text/css">
          body {
-             font-family: "Helvetica Neue", Helvetica, Arial;
+             font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial;
              font-size: 14px;
              line-height: 20px;
              font-weight: 400;
@@ -292,6 +293,10 @@
              text-align: center;
          }
 
+         .cell.width12 {
+             width: 12%;
+             max-width: 0px;
+         }
          @media screen and (max-width: 90%) {
              .cell {
                  padding: 2px 12px;
@@ -313,7 +318,7 @@
                         {{ $v.Name }}
                     </div>
                     <div class="cell">
-                        Status
+                        <!--                         Status -->
                     </div>
                     <div class="cell">
                         Time (sec)
@@ -324,10 +329,10 @@
                     <div class="cell">
                         Command
                     </div>
-                    <div class="cell">
+                    <div class="cell width12">
                         StdOutput
                     </div>
-                    <div class="cell">
+                    <div class="cell width12">
                         StdError
                     </div>
                 </div>
@@ -344,7 +349,7 @@
                         {{ $iv.Time | printf "%.2f" }}
                     </div>
                     <div class="cell">
-                        {{ $iv.Exit }}
+                        {{ $iv.Exit | html }}
                     </div>
                     <!-- <div class="cell" style="overflow:hidden;">
                          {{ $len := len $iv.Command }}{{ if gt $len 0 }}{{ $x := splitString $iv.Command }}
@@ -404,7 +409,7 @@
 
         </div>
 
-        <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
+        <script src="https://code.jquery.com/jquery-1.11.4.min.js"></script>
         <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 
