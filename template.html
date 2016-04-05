@@ -137,15 +137,15 @@
                      "value": 3
                  },
                  "content": [
-                     {{ range $k, $v := .Results }}
-                     {{ range $ik, $iv := .Results }}
+                     {{ range $k, $v := .Results -}}
+                     {{ range $ik, $iv := .Results -}}
                      {
                          "label": "{{ $v.Name }}, {{ $iv.Name }}",
                          "value": {{ $iv.Time }},
                          "color": "{{ rotateColorCharts $k $ik }}"
                      },
-                     {{ end }}
-                     {{ end }}
+                     {{- end }}
+                     {{- end }}
                  ]
              },
              "labels": {
@@ -311,7 +311,7 @@
         <div class="wrapper">
 
             <div class="table">
-            {{ range $k, $v := .Results }}
+            {{ range $k, $v := .Results -}}
 
                 <div class="{{ rotateColor $k }}">
                     <div class="cell">
@@ -337,7 +337,7 @@
                     </div>
                 </div>
 
-                {{ range $ik, $iv := $v.Results }}
+                {{ range $ik, $iv := $v.Results -}}
                 <div class="row">
                     <div class="cell">
                         {{ $iv.Name }}
@@ -364,21 +364,21 @@
                         {{ $iv.Command | html }}
                     </div>
                     <div class="cell" style="overflow:hidden;">
-                        {{ $len := len $iv.Stdout }}{{ if gt $len 2 }}
-                        <a href="" title='{{ range $iv.Stdout }}{{ . | html }}</br>{{ end }}'>show</a>
+                        {{ $len := len $iv.Stdout }}{{ if gt $len 2 -}}
+                        <button id="trigger_{{ $k }}_{{ $ik}}" class="trigger" data-tooltip-id="{{ $k }}_{{ $ik}}" title="{{ range $iv.Stdout }}{{ . | html }}</br>{{ end }}">view</button>
                         {{ else if eq $len 2 }}
                         {{ index $iv.Stdout 0 | html }}
-                        {{ end }}
+                        {{- end }}
                     </div>
                     <div class="cell" style="overflow:hidden;">
-                        {{ $len := len $iv.Stderr }}{{ if gt $len 2 }}
-                        <a href="" title='{{ range $iv.Stderr }}{{ . | html }}</br>{{ end }}'>show</a>
+                        {{ $len := len $iv.Stderr }}{{ if gt $len 2 -}}
+                        <button id="trigger_{{ $k }}_{{ $ik}}" class="trigger" data-tooltip-id="{{ $k }}_{{ $ik}}" title="{{ range $iv.Stderr }}{{ . | html }}</br>{{ end }}">view</button>
                         {{ else if eq $len 2 }}
                         {{ index $iv.Stderr 0 | html }}
-                        {{ end }}
+                        {{- end }}
                     </div>
                 </div>
-                {{ end }}
+                {{- end }}
 
                 <div class="row">
                     <div class="cell skip"></div>
@@ -403,48 +403,43 @@
                     <div class="cell skip"></div>
                     <div class="cell skip"></div>
                 </div>
-            {{ end }}
+            {{- end }}
             </div>
-
 
         </div>
 
-        <script src="https://code.jquery.com/jquery-1.11.4.min.js"></script>
+        <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
         <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 
         <script>
-         // Tooltip
-         $(function() {
-             $( document ).tooltip();
-         });
-
-         $.widget("ui.tooltip", $.ui.tooltip, {
-             options: {
-                 content: function () {
-                     return $(this).prop('title');
-                 }
-             }
-         });
-
-         $("a").tooltip({
-             // hide: {
-             //     effect: 'explode'// added for visibility
-             // }
-         }).mouseleave(function () { // on mouse leave
-             function callback(){
-                 return function(){
-                     $('a').tooltip('close'); // leave the tooltip open
-                     // alert("Hello ");
-                 }
-             }
-             setTimeout(callback(), 5000);
-
-             //if ($('a').is(':focus')) { // if input is focused
-             ui.tooltip.preventDefault(); //prevent the tooltip's default behavior
-             //}
-         }).focusout(function () { // on focus out
-             // $('a').tooltip('close'); // close the tooltip
+         $(function () {
+             //show
+             $(document).on('click', '.trigger', function () {
+                 $(this).addClass("on");
+                 $(this).tooltip({
+                     items: '.trigger.on',
+                     position: {
+                         my: "left+30 center",
+                         at: "right center",
+                         collision: "flip"
+                     },
+                     content: function(){
+                         var element = $( this );
+                         return element.attr('title')
+                     }
+                 });
+                 $(this).trigger('mouseenter');
+             });
+             //hide
+             $(document).on('click', '.trigger.on', function () {
+                 $(this).tooltip('close');
+                 $(this).removeClass("on");
+             });
+             //prevent mouseout and other related events from firing their handlers
+             $(".trigger").on('mouseout', function (e) {
+                 e.stopImmediatePropagation();
+             });
          });
         </script>
     </body>
