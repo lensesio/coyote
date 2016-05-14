@@ -70,7 +70,8 @@
     - name: Cloudera Perf Test (Kerberos)
       command: |
         /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
-        --producer-props bootstrap.servers="cloudera.landoop.com:9092" security.protocol=SASL_PLAINTEXT
+        --producer-props bootstrap.servers="cloudera.landoop.com:9092"
+#        --producer-props bootstrap.servers="cloudera.landoop.com:9092" security.protocol=SASL_PLAINTEXT
 
     - name: Confluent Perf Test (Non-Kerberos)
       command: |
