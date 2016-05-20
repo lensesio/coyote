@@ -18,6 +18,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+//go:generate go run template/include_templates.go
+
 var (
 	configFile = flag.String("c", "config.yml", "configuration file")
 )
@@ -197,8 +199,8 @@ func main() {
 			return r[0]
 		},
 	}
-	t, err := template.New("").Funcs(funcMap).ParseFiles("template.html")
-	//t, err := template.New("output").Funcs(funcMap).Parse("")
+	//t, err := template.New("").Funcs(funcMap).ParseFiles("template.html")
+	t, err := template.New("output").Funcs(funcMap).Parse(mainTemplate)
 
 	if err != nil {
 		log.Println(err)
@@ -216,16 +218,18 @@ func main() {
 				Successful int
 				TotalTests int
 				TotalTime  float64
+				Date       string
 			}{
 				resultsGroups,
 				errors,
 				passed,
 				errors + passed,
 				totalTime,
+				time.Now().UTC().Format("2006 Jan 02, Mon, 15:04 MST"),
 			}
 
-			err = t.ExecuteTemplate(h, "template.html", data)
-			// err = t.Execute(h, Results)
+			// err = t.ExecuteTemplate(h, "template.html", data)
+			err = t.Execute(h, data)
 			if err != nil {
 				log.Println(err)
 			}
