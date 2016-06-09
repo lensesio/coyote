@@ -21,11 +21,15 @@ import (
 //go:generate go run template/include_templates.go
 
 var (
-	configFile = flag.String("c", "config.yml", "configuration file")
+	configFile     = flag.String("c", "config.yml", "configuration file")
+	defaultTimeout = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
 )
 
 func init() {
 	flag.Parse()
+	if *defaultTimeout == 0 {
+		*defaultTimeout = time.Duration(365 * 24 * time.Hour)
+	}
 }
 
 func main() {
@@ -65,6 +69,12 @@ func main() {
 		log.Printf("Starting processing group '%s'.\n", v.Name)
 		// For entries in group
 		for _, v := range v.Entries {
+			if v.Timeout == 0 {
+				v.Timeout = *defaultTimeout
+			} else if v.Timeout < 0 {
+				v.Timeout = time.Duration(365 * 24 * time.Hour)
+			}
+
 			args, err := shellwords.Parse(v.Command)
 			if err != nil {
 				log.Printf("Error when parsing command %s for %s.\n", v.Command, v.Name)
@@ -89,15 +99,21 @@ func main() {
 			cmd.Stderr = cmdErr
 
 			start := time.Now()
-			//out, err := cmd.CombinedOutput()
+
+			timer := time.AfterFunc(v.Timeout, func() {
+				cmd.Process.Kill()
+			})
 			err = cmd.Run()
+			timerLive := timer.Stop() // If command already exited, the timer is still live.
+
 			elapsed := time.Since(start)
 
 			stdout := string(cmdOut.Bytes())
 			stderr := string(cmdErr.Bytes())
-			if err != nil {
+			if err != nil && timerLive {
 				log.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
-
+			} else if err != nil && !timerLive {
+				log.Printf("Timeout, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
 			} else {
 				log.Printf("Success, command '%s', test '%s'. Stdout: %s\n", v.Command, v.Name, strconv.Quote(stdout))
 			}
@@ -114,6 +130,9 @@ func main() {
 					t.Exit = err.Error()
 					resultGroup.Errors++
 					//errors++
+					if !timerLive {
+						t.Status = "timeout"
+					}
 				}
 				t.Time = elapsed.Seconds()
 				resultGroup.Results = append(resultGroup.Results, t)
@@ -183,7 +202,7 @@ func main() {
 		},
 		"colorStatus": func(s string) string {
 			switch s {
-			case "error":
+			case "error", "timeout":
 				return "red"
 			case "ok":
 				// return "green" // green disabled because status ok should be expected

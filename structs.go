@@ -1,13 +1,16 @@
 package main
 
+import "time"
+
 type Entry struct {
-	Name    string   `yaml:"name"`
-	WorkDir string   `yaml:"workdir"`
-	Command string   `yaml:"command,omitempty"`
-	Stdin   string   `yaml:"stdin,omitempty"`
-	Expect  string   `yaml:"expect,omitempty"`
-	NoLog   bool     `yaml:"nolog",omitempty`
-	EnvVars []string `yaml:"env",omitempty`
+	Name    string        `yaml:"name"`
+	WorkDir string        `yaml:"workdir"`
+	Command string        `yaml:"command,omitempty"`
+	Stdin   string        `yaml:"stdin,omitempty"`
+	Expect  string        `yaml:"expect,omitempty"`
+	NoLog   bool          `yaml:"nolog",omitempty`
+	EnvVars []string      `yaml:"env",omitempty`
+	Timeout time.Duration `yaml:"timeout,omitempty"`
 }
 
 type EntryGroup struct {

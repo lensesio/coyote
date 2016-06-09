@@ -16,3 +16,9 @@
     - name: base64
       command: |
         bash -c 'echo Hello World | base64'
+
+- name: test timeout
+  entries:
+    - name: sleep timeout
+      command: sleep 10
+      timeout: 5s
