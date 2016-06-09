@@ -127,10 +127,12 @@ func main() {
 				} else {
 					t.Status = "error"
 					t.Exit = err.Error()
+					t.Exit = strings.Replace(t.Exit, "exit status ", "", 1)
 					resultGroup.Errors++
 					//errors++
 					if !timerLive {
 						t.Status = "timeout"
+						t.Exit = "(timeout) " + t.Exit
 					}
 				}
 				t.Time = elapsed.Seconds()
