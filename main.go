@@ -99,13 +99,12 @@ func main() {
 			cmd.Stderr = cmdErr
 
 			start := time.Now()
-
 			timer := time.AfterFunc(v.Timeout, func() {
 				cmd.Process.Kill()
 			})
+			//out, err := cmd.CombinedOutput()
 			err = cmd.Run()
 			timerLive := timer.Stop() // If command already exited, the timer is still live.
-
 			elapsed := time.Since(start)
 
 			stdout := string(cmdOut.Bytes())
