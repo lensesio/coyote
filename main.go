@@ -24,6 +24,7 @@ var (
 	configFile     = flag.String("c", "config.yml", "configuration file")
 	defaultTimeout = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
 	title          = flag.String("title", "Coyote Tests", "title to use for report")
+	outputFile     = flag.String("out", "out.html", "filename to save the results under, if exists it will be overwritten")
 )
 
 func init() {
@@ -247,7 +248,7 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	} else {
-		f, err := os.Create("out.html")
+		f, err := os.Create(*outputFile)
 		defer f.Close()
 		if err != nil {
 			log.Println(err)
