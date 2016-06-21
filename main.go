@@ -3,12 +3,14 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
@@ -85,18 +87,6 @@ func main() {
 				v.Timeout = time.Duration(365 * 24 * time.Hour)
 			}
 
-			// Detect if we should also rely on search text in output.
-			var textSearch bool
-			if v.StdoutExpect != "" ||
-				v.StdoutNotExpect != "" ||
-				v.StderrExpect != "" ||
-				v.StderrNotExpect != "" {
-				textSearch = true
-			} else {
-				textSearch = false
-			}
-			fmt.Printf("Textsearch: %v\n", textSearch)
-
 			args, err := shellwords.Parse(v.Command)
 			if err != nil {
 				log.Printf("Error when parsing command %s for %s.\n", v.Command, v.Name)
@@ -132,25 +122,36 @@ func main() {
 			stdout := string(cmdOut.Bytes())
 			stderr := string(cmdErr.Bytes())
 
+			// Perform a textTest on outputs.
+			textErr := textTest(v, stdout, stderr)
+
 			if err != nil && timerLive {
 				log.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
 			} else if err != nil && !timerLive {
 				log.Printf("Timeout, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
+			} else if textErr != nil {
+				log.Printf("Output Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, textErr.Error(), strconv.Quote(stdout))
 			} else {
 				log.Printf("Success, command '%s', test '%s'. Stdout: %s\n", v.Command, v.Name, strconv.Quote(stdout))
 			}
 
 			if v.NoLog == false {
 				var t = Result{Name: v.Name, Command: v.Command, Stdout: strings.Split(stdout, "\n"), Stderr: strings.Split(stderr, "\n")}
-				if err == nil {
+
+				if err == nil && textErr == nil {
 					t.Status = "ok"
 					t.Exit = "0"
 					resultGroup.Passed++
 					//succesful++
 				} else {
 					t.Status = "error"
-					t.Exit = err.Error()
-					t.Exit = strings.Replace(t.Exit, "exit status ", "", 1)
+					if err != nil {
+						t.Exit = err.Error()
+						t.Exit = strings.Replace(t.Exit, "exit status ", "", 1)
+					} else {
+						t.Exit = "text"
+						t.Stderr = append(t.Stderr, strings.Split(textErr.Error(), "\n")...)
+					}
 					resultGroup.Errors++
 					//errors++
 					if !timerLive {
@@ -159,6 +160,10 @@ func main() {
 					}
 				}
 				t.Time = elapsed.Seconds()
+				// Clean Recursively Empty Top Lines from Output
+				t.Stdout = recurseClean(t.Stdout)
+				t.Stderr = recurseClean(t.Stderr)
+
 				resultGroup.Results = append(resultGroup.Results, t)
 				resultGroup.TotalTime += t.Time
 			}
@@ -291,4 +296,64 @@ func main() {
 		fmt.Printf("errors were made: %d\n", errors)
 		os.Exit(1)
 	}
+}
+
+func textTest(t Entry, stdout, stderr string) error {
+	var pass = true
+	var msg = ""
+
+	if len(t.StdoutExpect) > 0 {
+		matched, err := regexp.MatchString(t.StdoutExpect, stdout)
+		if err != nil {
+			pass = false
+			msg = fmt.Sprintf("Stdout_has Bad Regexp.\n", msg)
+		} else if !matched {
+			pass = false
+			msg = fmt.Sprintf("%sStdout_has not matched expected '%s'.\n", msg, t.StdoutExpect)
+		}
+	}
+	if len(t.StdoutNotExpect) > 0 {
+		matched, err := regexp.MatchString(t.StdoutNotExpect, stdout)
+		if err != nil {
+			pass = false
+			msg = fmt.Sprintf("%sStdout_not_has Bad Regexp.\n", msg)
+		} else if matched {
+			pass = false
+			msg = fmt.Sprintf("%sStdout_not_has matched not expected '%s'.\n", msg, t.StdoutNotExpect)
+		}
+	}
+	if len(t.StderrExpect) > 0 {
+		matched, err := regexp.MatchString(t.StderrExpect, stderr)
+		if err != nil {
+			pass = false
+			msg = fmt.Sprintf("%sStderr_has Bad Regexp.\n", msg)
+		} else if !matched {
+			pass = false
+			msg = fmt.Sprintf("%sStderr_has not matched expected '%s'.\n", msg, t.StderrExpect)
+		}
+	}
+	if len(t.StderrNotExpect) > 0 {
+		matched, err := regexp.MatchString(t.StderrNotExpect, stderr)
+		if err != nil {
+			pass = false
+			msg = fmt.Sprintf("%sStderr_not_has Bad Regexp.\n", msg)
+		} else if matched {
+			pass = false
+			msg = fmt.Sprintf("%sStderr_not_has matched not expected '%s'.\n", msg, t.StderrNotExpect)
+		}
+	}
+	if !pass {
+		return errors.New(msg)
+	}
+	return nil
+}
+
+// recurseClean cleans a []string from one or more empty entries at the start of the array.
+func recurseClean(t []string) []string {
+	if len(t) > 0 {
+		if len(t[0]) == 0 {
+			return recurseClean(t[1:])
+		}
+	}
+	return t
 }

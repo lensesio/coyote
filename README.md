@@ -25,9 +25,8 @@ Advanced options:
 - name: Test 2
   entries:
     - name: Long running command
-      command: |
-        sqoop-import --connect jdbc:mysql://mariadb.landoop.com/northwind
-                     --username data --password base
-                     --table Orders --m 1
+      command: cat
       timeout: 300s
+      stdin: hello
+
 ```

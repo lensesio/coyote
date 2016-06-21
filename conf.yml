@@ -22,5 +22,26 @@
 - name: test timeout
   entries:
     - name: sleep timeout
-      command: sleep 10
-      timeout: 5s
+      command: sleep 3
+      timeout: 1s
+
+- name: test stdin
+  entries:
+    - name: cat from stdin
+      command: cat
+      stdin: hello
+
+- name: test text search
+  entries:
+    - name: match stdout
+      command: echo "hello world"
+      stdout_has: hello
+    - name: not match stdout
+      command: echo "hello world"
+      stdout_not_has: foo
+    - name: not match expected stdout
+      command: echo "hello world"
+      stdout_has: foo
+    - name: match not expected stdout
+      command: echo "hello world"
+      stdout_not_has: hello
