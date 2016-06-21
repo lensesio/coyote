@@ -26,18 +26,19 @@
                       "records": [{"value": {"name": "testUser"}}]
                      }'
              "http://cloudera.landoop.com:8082/topics/coyote_test_avro"
-      stdout_not_has: [ 'error_code":[0-9]' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected' ]
     - name: Create Consumer for Avro data (rest proxy, schema registry)
       command: |
         curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.v1+json"
              --data '{"name": "a_consumer", "format": "avro", "auto.offset.reset": "smallest"}'
              "http://cloudera.landoop.com:8082/consumers/coyote_avro"
-      stdout_not_has: [ 'error_code":[0-9]' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected' ]
     - name: Consume Avro Message (rest proxy, schema registry)
       command: |
         curl -vs --stderr - -XGET -H "Accept: application/vnd.kafka.avro.v1+json"
              "http://cloudera.landoop.com:8082/consumers/coyote_avro/instances/a_consumer/topics/coyote_test_avro"
-      stdout_not_has: [ 'error_code":[0-9]' ]
+      stdout_has: [ 'testUser' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected' ]
     - name: Delete Avro Consumer (rest proxy, schema registry)
       command: curl -vs --stderr - -X DELETE "http://cloudera.landoop.com:8082/consumers/coyote_avro/instances/a_consumer"
     - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_avro --delete
@@ -46,18 +47,19 @@
       command: |
         curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.json.v1+json"
               --data '{"records":[{"value":{"foo":"bar"}}]}' "http://cloudera.landoop.com:8082/topics/coyote_test_json"
-      stdout_not_has: [ 'error_code":[0-9]' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected' ]
     - name: Create Consumer for JSON data (rest proxy)
       command: |
         curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.v1+json"
               --data '{"name": "a_consumer", "format": "json", "auto.offset.reset": "smallest"}'
               "http://cloudera.landoop.com:8082/consumers/coyote_json"
-      stdout_not_has: [ 'error_code":[0-9]' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected' ]
     - name: Consume JSON Message (rest proxy)
       command: |
         curl -vs --stderr - -XGET -H "Accept: application/vnd.kafka.json.v1+json" \
               "http://cloudera.landoop.com:8082/consumers/coyote_json/instances/a_consumer/topics/coyote_test_json"
-      stdout_not_has: [ 'error_code":[0-9]' ]
+      stdout_has: [ 'foo.*bar' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected' ]
     - name: Delete JSON Consumer (rest proxy)
       command: curl -vs --stderr - -X DELETE "http://cloudera.landoop.com:8082/consumers/coyote_json/instances/a_consumer"
     - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_json --delete
@@ -66,18 +68,19 @@
       command: |
         curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.binary.v1+json"
             --data '{"records":[{"value":"S2Fma2E="}]}' "http://cloudera.landoop.com:8082/topics/coyote_test_binary"
-      stdout_not_has: [ 'error_code":[0-9]' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected' ]
     - name: Create Consumer for Binary data (rest proxy)
       command: |
         curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.v1+json"
               --data '{"name": "a_consumer", "format": "binary", "auto.offset.reset": "smallest"}'
               "http://cloudera.landoop.com:8082/consumers/coyote_binary"
-      stdout_not_has: [ 'error_code":[0-9]' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected' ]
     - name: Consume Binary Message (rest proxy)
       command: |
         curl -vs --stderr - -XGET -H "Accept: application/vnd.kafka.binary.v1+json" \
               "http://cloudera.landoop.com:8082/consumers/coyote_binary/instances/a_consumer/topics/coyote_test_binary"
-      stdout_not_has: [ 'error_code":[0-9]' ]
+      stdout_has: [ 'S2Fma2E=' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected' ]
     - name: Delete Binary Consumer (rest proxy)
       command: curl -vs --stderr - -XDELETE "http://cloudera.landoop.com:8082/consumers/coyote_binary/instances/a_consumer"
     - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_binary --delete
