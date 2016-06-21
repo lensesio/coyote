@@ -9,16 +9,16 @@
         kafka-producer-perf-test --topic coyote_test_01 --throughput 100000 --record-size 1000 --num-records 2000000
                                  --producer-props bootstrap.servers="cloudera.landoop.com:9092"
     - name: List Topics (rest proxy)
-      command: curl "http://cloudera.landoop.com:8082/topics"
+      command: curl --stderr - "http://cloudera.landoop.com:8082/topics"
     - name: Topic Information (rest proxy)
-      command: curl "http://cloudera.landoop.com:8082/topics/coyote_test_01"
+      command: curl --stderr - "http://cloudera.landoop.com:8082/topics/coyote_test_01"
     - name: Topic Partitions (rest proxy)
-      command: curl "http://cloudera.landoop.com:8082/topics/coyote_test_01/partitions"
+      command: curl --stderr - "http://cloudera.landoop.com:8082/topics/coyote_test_01/partitions"
     - name: Delete Topic (basic kafka)
       command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_01 --delete
     - name: Produce Avro Message (rest proxy, schema registry)
       command: |
-        curl -X POST -H "Content-Type: application/vnd.kafka.avro.v1+json"
+        curl --stderr - -XPOST -H "Content-Type: application/vnd.kafka.avro.v1+json"
              --data '{
                       "value_schema": "{\"type\": \"record\", \"name\": \"User\", \"fields\": [{\"name\": \"name\", \"type\": \"string\"}]}",
                       "records": [{"value": {"name": "testUser"}}]
@@ -26,48 +26,48 @@
              "http://cloudera.landoop.com:8082/topics/coyote_test_avro"
     - name: Create Consumer for Avro data (rest proxy, schema registry)
       command: |
-        curl -X POST -H "Content-Type: application/vnd.kafka.v1+json"
+        curl --stderr - -XPOST -H "Content-Type: application/vnd.kafka.v1+json"
              --data '{"name": "a_consumer", "format": "avro", "auto.offset.reset": "smallest"}'
              "http://cloudera.landoop.com:8082/consumers/coyote_avro"
     - name: Consume Avro Message (rest proxy, schema registry)
       command: |
-        curl -X GET -H "Accept: application/vnd.kafka.avro.v1+json"
+        curl --stderr - -XGET -H "Accept: application/vnd.kafka.avro.v1+json"
              "http://cloudera.landoop.com:8082/consumers/coyote_avro/instances/a_consumer/topics/coyote_test_avro"
     - name: Delete Avro Consumer (rest proxy, schema registry)
-      command: curl -X DELETE "http://cloudera.landoop.com:8082/consumers/coyote/instances/a_consumer"
+      command: curl --stderr - -X DELETE "http://cloudera.landoop.com:8082/consumers/coyote_avro/instances/a_consumer"
     - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_avro --delete
       nolog: true
     - name: Produce JSON Message (rest proxy)
       command: |
-        curl -X POST -H "Content-Type: application/vnd.kafka.json.v1+json"
+        curl --stderr - -XPOST -H "Content-Type: application/vnd.kafka.json.v1+json"
               --data '{"records":[{"value":{"foo":"bar"}}]}' "http://cloudera.landoop.com:8082/topics/coyote_test_json"
     - name: Create Consumer for JSON data (rest proxy)
       command: |
-        curl -X POST -H "Content-Type: application/vnd.kafka.v1+json"
+        curl --stderr - -XPOST -H "Content-Type: application/vnd.kafka.v1+json"
               --data '{"name": "a_consumer", "format": "json", "auto.offset.reset": "smallest"}'
               "http://cloudera.landoop.com:8082/consumers/coyote_json"
     - name: Consume JSON Message (rest proxy)
       command: |
-        curl -X GET -H "Accept: application/vnd.kafka.json.v1+json" \
+        curl --stderr - -XGET -H "Accept: application/vnd.kafka.json.v1+json" \
               "http://cloudera.landoop.com:8082/consumers/coyote_json/instances/a_consumer/topics/coyote_test_json"
     - name: Delete JSON Consumer (rest proxy)
-      command: curl -X DELETE "http://cloudera.landoop.com:8082/consumers/coyote_json/instances/a_consumer"
+      command: curl --stderr - -X DELETE "http://cloudera.landoop.com:8082/consumers/coyote_json/instances/a_consumer"
     - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_json --delete
       nolog: true
     - name: Produce Binary Message (rest proxy)
       command: |
-        curl -X POST -H "Content-Type: application/vnd.kafka.binary.v1+json"
+        curl --stderr - -XPOST -H "Content-Type: application/vnd.kafka.binary.v1+json"
             --data '{"records":[{"value":"S2Fma2E="}]}' "http://cloudera.landoop.com:8082/topics/coyote_test_binary"
     - name: Create Consumer for Binary data (rest proxy)
       command: |
-        curl -X POST -H "Content-Type: application/vnd.kafka.v1+json"
+        curl --stderr - -XPOST -H "Content-Type: application/vnd.kafka.v1+json"
               --data '{"name": "a_consumer", "format": "binary", "auto.offset.reset": "smallest"}'
               "http://cloudera.landoop.com:8082/consumers/coyote_binary"
     - name: Consume Binary Message (rest proxy)
       command: |
-        curl -X GET -H "Accept: application/vnd.kafka.binary.v1+json" \
-              "http://cloudera.landoop.com:8082/consumers/coyote_binary/instances/a_consumer/topics/coyote_test_json"
+        curl --stderr - -XGET -H "Accept: application/vnd.kafka.binary.v1+json" \
+              "http://cloudera.landoop.com:8082/consumers/coyote_binary/instances/a_consumer/topics/coyote_test_binary"
     - name: Delete Binary Consumer (rest proxy)
-      command: curl -X DELETE "http://cloudera.landoop.com:8082/consumers/coyote_binary/instances/a_consumer"
-    - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_json --delete
+      command: curl --stderr - -XDELETE "http://cloudera.landoop.com:8082/consumers/coyote_binary/instances/a_consumer"
+    - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_binary --delete
       nolog: true
