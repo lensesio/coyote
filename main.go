@@ -302,44 +302,52 @@ func textTest(t Entry, stdout, stderr string) error {
 	var pass = true
 	var msg = ""
 
-	if len(t.StdoutExpect) > 0 {
-		matched, err := regexp.MatchString(t.StdoutExpect, stdout)
-		if err != nil {
-			pass = false
-			msg = fmt.Sprintf("Stdout_has Bad Regexp.\n", msg)
-		} else if !matched {
-			pass = false
-			msg = fmt.Sprintf("%sStdout_has not matched expected '%s'.\n", msg, t.StdoutExpect)
+	for _, v := range t.StdoutExpect {
+		if len(v) > 0 {
+			matched, err := regexp.MatchString(v, stdout)
+			if err != nil {
+				pass = false
+				msg = fmt.Sprintf("Stdout_has Bad Regexp.\n", msg)
+			} else if !matched {
+				pass = false
+				msg = fmt.Sprintf("%sStdout_has not matched expected '%s'.\n", msg, v)
+			}
 		}
 	}
-	if len(t.StdoutNotExpect) > 0 {
-		matched, err := regexp.MatchString(t.StdoutNotExpect, stdout)
-		if err != nil {
-			pass = false
-			msg = fmt.Sprintf("%sStdout_not_has Bad Regexp.\n", msg)
-		} else if matched {
-			pass = false
-			msg = fmt.Sprintf("%sStdout_not_has matched not expected '%s'.\n", msg, t.StdoutNotExpect)
+	for _, v := range t.StdoutNotExpect {
+		if len(v) > 0 {
+			matched, err := regexp.MatchString(v, stdout)
+			if err != nil {
+				pass = false
+				msg = fmt.Sprintf("%sStdout_not_has Bad Regexp.\n", msg)
+			} else if matched {
+				pass = false
+				msg = fmt.Sprintf("%sStdout_not_has matched not expected '%s'.\n", msg, v)
+			}
 		}
 	}
-	if len(t.StderrExpect) > 0 {
-		matched, err := regexp.MatchString(t.StderrExpect, stderr)
-		if err != nil {
-			pass = false
-			msg = fmt.Sprintf("%sStderr_has Bad Regexp.\n", msg)
-		} else if !matched {
-			pass = false
-			msg = fmt.Sprintf("%sStderr_has not matched expected '%s'.\n", msg, t.StderrExpect)
+	for _, v := range t.StderrExpect {
+		if len(v) > 0 {
+			matched, err := regexp.MatchString(v, stderr)
+			if err != nil {
+				pass = false
+				msg = fmt.Sprintf("%sStderr_has Bad Regexp.\n", msg)
+			} else if !matched {
+				pass = false
+				msg = fmt.Sprintf("%sStderr_has not matched expected '%s'.\n", msg, v)
+			}
 		}
 	}
-	if len(t.StderrNotExpect) > 0 {
-		matched, err := regexp.MatchString(t.StderrNotExpect, stderr)
-		if err != nil {
-			pass = false
-			msg = fmt.Sprintf("%sStderr_not_has Bad Regexp.\n", msg)
-		} else if matched {
-			pass = false
-			msg = fmt.Sprintf("%sStderr_not_has matched not expected '%s'.\n", msg, t.StderrNotExpect)
+	for _, v := range t.StderrNotExpect {
+		if len(v) > 0 {
+			matched, err := regexp.MatchString(v, stderr)
+			if err != nil {
+				pass = false
+				msg = fmt.Sprintf("%sStderr_not_has Bad Regexp.\n", msg)
+			} else if matched {
+				pass = false
+				msg = fmt.Sprintf("%sStderr_not_has matched not expected '%s'.\n", msg, v)
+			}
 		}
 	}
 	if !pass {
