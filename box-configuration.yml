@@ -1,3 +1,5 @@
+- name: coyote
+  title: Box CDH Tests
 - name: Hadoop Tutorial
   entries:
     - name: Clone Landoop Intro Repo

@@ -23,6 +23,7 @@ import (
 var (
 	configFile     = flag.String("c", "config.yml", "configuration file")
 	defaultTimeout = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
+	title          = flag.String("title", "Coyote Tests", "title to use for report")
 )
 
 func init() {
@@ -66,14 +67,34 @@ func main() {
 			TotalTime: 0.0,
 		}
 
+		// Reserved name coyote is used to set the title (and maybe other global vars in the future).
+		if v.Name == "coyote" {
+			*title = v.Title
+			continue
+		}
+
 		log.Printf("Starting processing group '%s'.\n", v.Name)
 		// For entries in group
 		for _, v := range v.Entries {
+
+			// If timeout is missing, set the default. If it is <0, set infinite.
 			if v.Timeout == 0 {
 				v.Timeout = *defaultTimeout
 			} else if v.Timeout < 0 {
 				v.Timeout = time.Duration(365 * 24 * time.Hour)
 			}
+
+			// Detect if we should also rely on search text in output.
+			var textSearch bool
+			if v.StdoutExpect != "" ||
+				v.StdoutNotExpect != "" ||
+				v.StderrExpect != "" ||
+				v.StderrNotExpect != "" {
+				textSearch = true
+			} else {
+				textSearch = false
+			}
+			fmt.Printf("Textsearch: %v\n", textSearch)
 
 			args, err := shellwords.Parse(v.Command)
 			if err != nil {
@@ -109,6 +130,7 @@ func main() {
 
 			stdout := string(cmdOut.Bytes())
 			stderr := string(cmdErr.Bytes())
+
 			if err != nil && timerLive {
 				log.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
 			} else if err != nil && !timerLive {
@@ -239,6 +261,7 @@ func main() {
 				TotalTests int
 				TotalTime  float64
 				Date       string
+				Title      string
 			}{
 				resultsGroups,
 				errors,
@@ -246,6 +269,7 @@ func main() {
 				errors + passed,
 				totalTime,
 				time.Now().UTC().Format("2006 Jan 02, Mon, 15:04 MST"),
+				*title,
 			}
 
 			// err = t.ExecuteTemplate(h, "template.html", data)

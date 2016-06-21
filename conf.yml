@@ -1,3 +1,5 @@
+- name: coyote
+  title: Sample YML
 - name: test
   entries:
     - name: ls
