@@ -60,3 +60,9 @@
       command: cat
       stdin: |
         First: %UNIQUE% Second: %UNIQUE%
+
+- name: test ignore exit code
+  entries:
+    - name: ignore exit code
+      command: false
+      ignore_exit_code: true

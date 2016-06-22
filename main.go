@@ -129,7 +129,7 @@ func main() {
 			// Perform a textTest on outputs.
 			textErr := textTest(v, stdout, stderr)
 
-			if err != nil && timerLive {
+			if err != nil && timerLive && !v.IgnoreExitCode {
 				log.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
 			} else if err != nil && !timerLive {
 				log.Printf("Timeout, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
@@ -142,16 +142,19 @@ func main() {
 			if v.NoLog == false {
 				var t = Result{Name: v.Name, Command: v.Command, Stdout: strings.Split(stdout, "\n"), Stderr: strings.Split(stderr, "\n")}
 
-				if err == nil && textErr == nil {
+				if (err == nil || v.IgnoreExitCode) && textErr == nil {
 					t.Status = "ok"
-					t.Exit = "0"
+					if err != nil { // Here we have ignore_exit_code
+						t.Exit = "(ignore) " + strings.Replace(err.Error(), "exit status ", "", 1)
+					} else { // Here we exited normally
+						t.Exit = "0"
+					}
 					resultGroup.Passed++
 					//succesful++
 				} else {
 					t.Status = "error"
 					if err != nil {
-						t.Exit = err.Error()
-						t.Exit = strings.Replace(t.Exit, "exit status ", "", 1)
+						t.Exit = strings.Replace(err.Error(), "exit status ", "", 1)
 					} else {
 						t.Exit = "text"
 						t.Stderr = append(t.Stderr, strings.Split(textErr.Error(), "\n")...)

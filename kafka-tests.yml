@@ -124,3 +124,69 @@
     - name: Get Schema Registry Configuration (schema registry)
       command: curl -vs --stderr - -XGET -i "http://cloudera.landoop.com:8081/config"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - name: Get list of Connectors (connect distributed)
+      command: curl -vs --stderr - -XGET -i "http://cloudera.landoop.com:8085/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - name: Create a console connector (connect distributed)
+      command: |
+        curl -vs --stderr - -X POST -H "Content-Type: application/json"
+             --data '{"name": "local-console-source", "config": {"connector.class":"org.apache.kafka.connect.file.FileStreamSourceConnector", "tasks.max":"1", "topic":"connect-test" }}'
+        "http://cloudera.landoop.com:8085/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - command: rm -rf coyote_test.sqlite coyote_sqlite_connector.properties coyote_connect_standalone.properties coyote_connect.offset
+      nolog: true
+    - name: Create and Init SQLite database
+      command: sqlite3 coyote_test.sqlite
+      stdin: |
+        CREATE TABLE accounts(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name VARCHAR(255));
+        INSERT INTO accounts(name) VALUES('alice');
+        INSERT INTO accounts(name) VALUES('bob');
+    - command: tee coyote_sqlite_connector.properties
+      stdin: |
+        name=coyote-test-connect-standalone-%UNIQUE%
+        connector.class=io.confluent.connect.jdbc.JdbcSourceConnector
+        tasks.max=1
+        connection.url=jdbc:sqlite:coyote_test.sqlite
+        mode=incrementing
+        incrementing.column.name=id
+        topic.prefix=coyote-test-connect-standalone-
+    - command: tee coyote_connect_standalone.properties
+      stdin: |
+        bootstrap.servers=cloudera.landoop.com:9092
+        key.converter=io.confluent.connect.avro.AvroConverter
+        key.converter.schema.registry.url=http://cloudera.landoop.com:8081
+        value.converter=io.confluent.connect.avro.AvroConverter
+        value.converter.schema.registry.url=http://cloudera.landoop.com:8081
+        internal.key.converter=org.apache.kafka.connect.json.JsonConverter
+        internal.value.converter=org.apache.kafka.connect.json.JsonConverter
+        internal.key.converter.schemas.enable=false
+        internal.value.converter.schemas.enable=false
+        offset.storage.file.filename=coyote_connect.offset
+        offset.flush.interval.ms=5000
+        zookeeper=cloudera.landoop.com:2181/confluent
+        rest.port=38081
+        port=38081
+        kafka.logs.dir=logs/
+    - name: Read SQLite into Topic (connect standalone)
+      command: timeout 9 connect-standalone coyote_connect_standalone.properties coyote_sqlite_connector.properties
+      stdout_not_has: [ 'ERROR' ]
+      ignore_exit_code: true
+    - name: Create Consumer for Avro data (rest proxy, schema registry)
+      command: |
+        curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.v1+json"
+             --data '{"name": "a_consumer", "format": "avro", "auto.offset.reset": "smallest"}'
+             "http://cloudera.landoop.com:8082/consumers/coyote_connect_standalone"
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected', 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - name: Consume Avro Message (rest proxy, schema registry)
+      command: |
+        curl -vs --stderr - -XGET -H "Accept: application/vnd.kafka.avro.v1+json"
+             "http://cloudera.landoop.com:8082/consumers/coyote_connect_standalone/instances/a_consumer/topics/coyote-test-connect-standalone-accounts"
+      stdout_has: [ 'alice', 'bob' ]
+      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected', 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - name: Delete Avro Consumer (rest proxy, schema registry)
+      command: curl -vs --stderr - -X DELETE "http://cloudera.landoop.com:8082/consumers/coyote_connect_standalone/instances/a_consumer"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - name: Delete Connect Standalone Test Topic (basic kafka)
+      command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote-test-connect-standalone-accounts --delete
+    - command: rm -rf coyote_test.sqlite coyote_sqlite_connector.properties coyote_connect_standalone.properties coyote_connect.offset
+      nolog: true

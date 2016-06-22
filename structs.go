@@ -14,8 +14,8 @@ type Entry struct {
 	StdoutNotExpect []string      `yaml:"stdout_not_has,omitempty"`
 	StderrExpect    []string      `yaml:"stderr_has,omitempty"`
 	StderrNotExpect []string      `yaml:"stderr_not_has,omitempty"`
-	OnlyText        bool          `yaml:"only_text,omitempty"`   // NI (Not Implemented)
-	ExpectFail      bool          `yaml:"expect_fail,omitempty"` // NI
+	OnlyText        bool          `yaml:"only_text,omitempty"` // NI (Not Implemented)
+	IgnoreExitCode  bool          `yaml:"ignore_exit_code,omitempty"`
 }
 
 type EntryGroup struct {
