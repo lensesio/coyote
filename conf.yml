@@ -51,3 +51,12 @@
     - name: match not expected stdout
       command: echo "hello world"
       stdout_not_has: [ hello ]
+
+- name: test unique string generation
+  entries:
+    - name: command
+      command: echo %UNIQUE%
+    - name: stdin
+      command: cat
+      stdin: |
+        First: %UNIQUE% Second: %UNIQUE%

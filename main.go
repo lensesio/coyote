@@ -80,6 +80,10 @@ func main() {
 		// For entries in group
 		for _, v := range v.Entries {
 
+			// If unique strings are asked, replace the placeholders
+			v.Command = replaceUnique(v.Command)
+			v.Stdin = replaceUnique(v.Stdin)
+
 			// If timeout is missing, set the default. If it is <0, set infinite.
 			if v.Timeout == 0 {
 				v.Timeout = *defaultTimeout
@@ -364,4 +368,26 @@ func recurseClean(t []string) []string {
 		}
 	}
 	return t
+}
+
+// replaces instances of %UNIQUE% with a unique string based on current microsecond.
+func replaceUnique(s string) (result string) {
+	var contain = true
+	result = s
+	for {
+		switch contain {
+		case true:
+			if strings.Contains(result, "%UNIQUE%") {
+				t := time.Now().Nanosecond()
+				t = t / 1000
+				time.Sleep(1000 * time.Nanosecond)
+				uniqueString := fmt.Sprintf("%d", t)
+				result = strings.Replace(result, "%UNIQUE%", uniqueString, 1)
+			} else {
+				contain = false
+			}
+		case false:
+			return
+		}
+	}
 }
