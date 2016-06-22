@@ -1,5 +1,10 @@
 - name: coyote
   title: Confluent CSD Tests
+# Tests we should add:
+# - kafka-avro-console-consumer
+# - test output of distributed connector
+# - test hdfs-sink (difficult, test with kerberos in standalone)
+
 - name: w/o SASL, w/o SSL
   entries:
     - name: Create Topic (basic kafka)
@@ -130,8 +135,12 @@
     - name: Create a console connector (connect distributed)
       command: |
         curl -vs --stderr - -X POST -H "Content-Type: application/json"
-             --data '{"name": "local-console-source", "config": {"connector.class":"org.apache.kafka.connect.file.FileStreamSourceConnector", "tasks.max":"1", "topic":"connect-test" }}'
+             --data '{ "name": "coyote_test_console_source",
+                       "config": {"connector.class":"org.apache.kafka.connect.file.FileStreamSourceConnector", "tasks.max":"1", "topic":"connect-test" }}'
         "http://cloudera.landoop.com:8085/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - name: Delete connector
+      command:  curl -vs --stderr - -XDELETE "http://cloudera.landoop.com:8085/connectors/coyote_test_console_source"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - command: rm -rf coyote_test.sqlite coyote_sqlite_connector.properties coyote_connect_standalone.properties coyote_connect.offset
       nolog: true
@@ -171,21 +180,15 @@
       command: timeout 9 connect-standalone coyote_connect_standalone.properties coyote_sqlite_connector.properties
       stdout_not_has: [ 'ERROR' ]
       ignore_exit_code: true
-    - name: Create Consumer for Avro data (rest proxy, schema registry)
+    - name: Run Console Consumer (basic kafka)
       command: |
-        curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.v1+json"
-             --data '{"name": "a_consumer", "format": "avro", "auto.offset.reset": "smallest"}'
-             "http://cloudera.landoop.com:8082/consumers/coyote_connect_standalone"
-      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected', 'HTTP/1.1 [45][0-9][0-9] ' ]
-    - name: Consume Avro Message (rest proxy, schema registry)
-      command: |
-        curl -vs --stderr - -XGET -H "Accept: application/vnd.kafka.avro.v1+json"
-             "http://cloudera.landoop.com:8082/consumers/coyote_connect_standalone/instances/a_consumer/topics/coyote-test-connect-standalone-accounts"
+        timeout 5
+        kafka-console-consumer --new-consumer
+                               --bootstrap-server cloudera.landoop.com:9092
+                               --topic coyote-test-connect-standalone-accounts
+                               --from-beginning
       stdout_has: [ 'alice', 'bob' ]
-      stdout_not_has: [ 'error_code":[0-9]', 'Unexpected', 'HTTP/1.1 [45][0-9][0-9] ' ]
-    - name: Delete Avro Consumer (rest proxy, schema registry)
-      command: curl -vs --stderr - -X DELETE "http://cloudera.landoop.com:8082/consumers/coyote_connect_standalone/instances/a_consumer"
-      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      ignore_exit_code: true
     - name: Delete Connect Standalone Test Topic (basic kafka)
       command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote-test-connect-standalone-accounts --delete
     - command: rm -rf coyote_test.sqlite coyote_sqlite_connector.properties coyote_connect_standalone.properties coyote_connect.offset
