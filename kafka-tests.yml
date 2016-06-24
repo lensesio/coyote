@@ -7,6 +7,7 @@
 
 - name: w/o SASL, w/o SSL
   entries:
+# BASIC / PERFORMANCE
     - name: Create Topic (basic kafka)
       command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_01 --partition 3 --replication 1 --create
     - name: List Topics (basic kafka)
@@ -26,13 +27,14 @@
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - name: Delete Topic (basic kafka)
       command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_01 --delete
+# HTTP REST PROXY
     - name: Produce Avro Message (rest proxy, schema registry)
+      # Please do not change the formatting (e.g. add new lines) of the JSON message below, REST Proxy is very sensitive.
       command: |
-        curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.avro.v1+json"
-             --data '{
-                      "value_schema": "{\"type\": \"record\", \"name\": \"User\", \"fields\": [{\"name\": \"name\", \"type\": \"string\"}]}",
-                      "records": [{"value": {"name": "testUser"}}]
-                     }'
+        curl -vs --stderr - -XPOST
+             -H "Content-Type: application/vnd.kafka.avro.v1+json"
+             --data '{"value_schema": "{\"type\": \"record\", \"name\": \"User\", \"fields\": [{\"name\": \"name\", \"type\": \"string\"}]}",
+                      "records": [{"value": {"name": "testUser"}}]}'
              "http://cloudera.landoop.com:8082/topics/coyote_test_avro"
       stdout_not_has: [ 'error_code":[0-9]', 'Unexpected', 'HTTP/1.1 [45][0-9][0-9] ' ]
     - name: Create Consumer for Avro data (rest proxy, schema registry)
@@ -52,6 +54,7 @@
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_avro --delete
       nolog: true
+
     - name: Produce JSON Message (rest proxy)
       command: |
         curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.json.v1+json"
@@ -74,6 +77,7 @@
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_json --delete
       nolog: true
+
     - name: Produce Binary Message (rest proxy)
       command: |
         curl -vs --stderr - -XPOST -H "Content-Type: application/vnd.kafka.binary.v1+json"
@@ -96,6 +100,7 @@
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_binary --delete
       nolog: true
+# SCHEMA REGISTRY
     - name: Register a new Schema version (schema registry)
       command: |
         curl  -vs --stderr - -XPOST -i -H "Content-Type: application/vnd.schemaregistry.v1+json"
@@ -129,19 +134,39 @@
     - name: Get Schema Registry Configuration (schema registry)
       command: curl -vs --stderr - -XGET -i "http://cloudera.landoop.com:8081/config"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+# CONNECT
     - name: Get list of Connectors (connect distributed)
       command: curl -vs --stderr - -XGET -i "http://cloudera.landoop.com:8085/connectors"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
-    - name: Create a console connector (connect distributed)
+
+    - name: Create a Console Connector (connect distributed)
       command: |
         curl -vs --stderr - -X POST -H "Content-Type: application/json"
              --data '{ "name": "coyote_test_console_source",
-                       "config": {"connector.class":"org.apache.kafka.connect.file.FileStreamSourceConnector", "tasks.max":"1", "topic":"connect-test" }}'
-        "http://cloudera.landoop.com:8085/connectors"
+               "config": {"connector.class":"org.apache.kafka.connect.file.FileStreamSourceConnector","tasks.max":"1","topic":"coyote_connect_distributed_test","file":"/etc/fstab"}}'
+             "http://cloudera.landoop.com:8085/connectors"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - name: Get Connector s Configuration (connect distributed)
+      command: curl -vs --stderr - -XGET -i "http://cloudera.landoop.com:8085/connectors/coyote_test_console_source"
+      stdout_has: [ '/etc/fstab' ]
+    - name: Sleep a bit to let the connector work
+      command: sleep 9
+      nolog: true
+    - name: Run Console Consumer (basic kafka)
+      command: |
+        timeout 5
+        kafka-console-consumer --new-consumer
+                               --bootstrap-server cloudera.landoop.com:9092
+                               --topic coyote_connect_distributed_test
+                               --from-beginning
+      stdout_has: [ 'etc/fstab' ]
+      ignore_exit_code: true
     - name: Delete connector
       command:  curl -vs --stderr - -XDELETE "http://cloudera.landoop.com:8085/connectors/coyote_test_console_source"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - name: Delete Connect Standalone Test Topic (basic kafka)
+      command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_connect_distributed_test --delete
+
     - command: rm -rf coyote_test.sqlite coyote_sqlite_connector.properties coyote_connect_standalone.properties coyote_connect.offset
       nolog: true
     - name: Create and Init SQLite database
@@ -150,7 +175,8 @@
         CREATE TABLE accounts(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name VARCHAR(255));
         INSERT INTO accounts(name) VALUES('alice');
         INSERT INTO accounts(name) VALUES('bob');
-    - command: tee coyote_sqlite_connector.properties
+    - name: Create coyote_sqlite_connector.properties
+      command: tee coyote_sqlite_connector.properties
       stdin: |
         name=coyote-test-connect-standalone-%UNIQUE%
         connector.class=io.confluent.connect.jdbc.JdbcSourceConnector
@@ -159,7 +185,8 @@
         mode=incrementing
         incrementing.column.name=id
         topic.prefix=coyote-test-connect-standalone-
-    - command: tee coyote_connect_standalone.properties
+    - name: Create coyote_connect_standalone.properties
+      command: tee coyote_connect_standalone.properties
       stdin: |
         bootstrap.servers=cloudera.landoop.com:9092
         key.converter=io.confluent.connect.avro.AvroConverter
