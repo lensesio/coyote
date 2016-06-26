@@ -27,6 +27,7 @@ var (
 	defaultTimeout = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
 	title          = flag.String("title", "Coyote Tests", "title to use for report")
 	outputFile     = flag.String("out", "out.html", "filename to save the results under, if exists it will be overwritten")
+	execute        = flag.Bool("execute", true, "whether to actually execute the tests, otherwise mock them")
 )
 
 func init() {
@@ -38,7 +39,7 @@ func init() {
 
 func main() {
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
-	logger.Printf("Starting coyote-tester.\n")
+	logger.Printf("Starting coyote-tester\n")
 
 	// Open yml configuration
 	configData, err := ioutil.ReadFile(*configFile)
@@ -76,7 +77,7 @@ func main() {
 			continue
 		}
 
-		log.Printf("Starting processing group '%s'.\n", v.Name)
+		log.Printf("Starting processing group: [ %s ]\n", v.Name)
 		// For entries in group
 		for _, v := range v.Entries {
 
@@ -92,10 +93,16 @@ func main() {
 			}
 
 			args, err := shellwords.Parse(v.Command)
+			log.Printf("Nada: %s", args)
 			if err != nil {
-				log.Printf("Error when parsing command %s for %s.\n", v.Command, v.Name)
+				log.Printf("Error when parsing command [ %s ] for [ %s ]\n", v.Command, v.Name)
 			}
 
+			// TODO
+			// if (!execute)
+			//   cmd := exec.Command("echo", args[0:]...)
+			// else
+			//   ...
 			cmd := exec.Command(args[0], args[1:]...)
 			if len(v.WorkDir) > 0 {
 				cmd.Dir = v.WorkDir
@@ -314,7 +321,7 @@ func textTest(t Entry, stdout, stderr string) error {
 			matched, err := regexp.MatchString(v, stdout)
 			if err != nil {
 				pass = false
-				msg = fmt.Sprintf("Stdout_has Bad Regexp.\n", msg)
+				msg = fmt.Sprintf("%sStdout_has Bad Regexp. \n", msg)
 			} else if !matched {
 				pass = false
 				msg = fmt.Sprintf("%sStdout_has not matched expected '%s'.\n", msg, v)

@@ -3,6 +3,10 @@ A simple test agent. To build:
     go generate
     go build
 
+To execute:
+
+    ./coyote-tester -c kafka-tests.yml -out confluent.html
+
 Sample entry in configuration yml file:
 
 ```

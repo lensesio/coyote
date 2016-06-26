@@ -7,8 +7,8 @@ type Entry struct {
 	WorkDir         string        `yaml:"workdir"`
 	Command         string        `yaml:"command,omitempty"`
 	Stdin           string        `yaml:"stdin,omitempty"`
-	NoLog           bool          `yaml:"nolog",omitempty`
-	EnvVars         []string      `yaml:"env",omitempty`
+	NoLog           bool          `yaml:"nolog,omitempty"`
+	EnvVars         []string      `yaml:"env,omitempty"`
 	Timeout         time.Duration `yaml:"timeout,omitempty"`
 	StdoutExpect    []string      `yaml:"stdout_has,omitempty"`
 	StdoutNotExpect []string      `yaml:"stdout_not_has,omitempty"`
