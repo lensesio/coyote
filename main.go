@@ -102,7 +102,7 @@ func main() {
 			}
 
 			args, err := shellwords.Parse(v.Command)
-			log.Printf("Nada: %s", args)
+
 			if err != nil {
 				log.Printf("Error when parsing command [ %s ] for [ %s ]\n", v.Command, v.Name)
 			}

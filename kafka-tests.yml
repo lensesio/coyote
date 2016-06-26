@@ -152,6 +152,14 @@
     - name: Sleep a bit to let the connector work
       command: sleep 9
       nolog: true
+    - name: "Run Console Consumer to fix Kafka's transient state (basic kafka)"
+      command: |
+        timeout 5
+        kafka-console-consumer --new-consumer
+                               --bootstrap-server cloudera.landoop.com:9092
+                               --topic coyote_connect_distributed_test-%UNIQUE_CD%
+                               --from-beginning
+      ignore_exit_code: true
     - name: Run Console Consumer (basic kafka)
       command: |
         timeout 5
