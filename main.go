@@ -27,7 +27,13 @@ var (
 	defaultTimeout = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
 	title          = flag.String("title", "Coyote Tests", "title to use for report")
 	outputFile     = flag.String("out", "out.html", "filename to save the results under, if exists it will be overwritten")
-	execute        = flag.Bool("execute", true, "whether to actually execute the tests, otherwise mock them")
+
+//	execute        = flag.Bool("execute", true, "whether to actually execute the tests, otherwise mock them")
+)
+
+var (
+	uniqStrings = make(map[string]string)
+	uniqRegexp  = regexp.MustCompile("%UNIQUE_[0-9A-Za-z_-]+%")
 )
 
 func init() {
@@ -84,6 +90,9 @@ func main() {
 			// If unique strings are asked, replace the placeholders
 			v.Command = replaceUnique(v.Command)
 			v.Stdin = replaceUnique(v.Stdin)
+			for k2, v2 := range v.EnvVars {
+				v.EnvVars[k2] = replaceUnique(v2)
+			}
 
 			// If timeout is missing, set the default. If it is <0, set infinite.
 			if v.Timeout == 0 {
@@ -160,7 +169,7 @@ func main() {
 					//succesful++
 				} else {
 					t.Status = "error"
-					if err != nil {
+					if err != nil && !v.IgnoreExitCode {
 						t.Exit = strings.Replace(err.Error(), "exit status ", "", 1)
 					} else {
 						t.Exit = "text"
@@ -387,17 +396,35 @@ func replaceUnique(s string) (result string) {
 	for {
 		switch contain {
 		case true:
-			if strings.Contains(result, "%UNIQUE%") {
-				t := time.Now().Nanosecond()
-				t = t / 1000
-				time.Sleep(1000 * time.Nanosecond)
-				uniqueString := fmt.Sprintf("%d", t)
-				result = strings.Replace(result, "%UNIQUE%", uniqueString, 1)
+			if strings.Contains(result, "%UNIQUE%") { // Single use unique var
+				t := time.Now().UnixNano()
+				t = t / 1e6 // Keep millisecond
+				time.Sleep(time.Millisecond)
+				uniqueText := fmt.Sprintf("%d", t)
+				result = strings.Replace(result, "%UNIQUE%", uniqueText, 1)
+			} else if uniqRegexp.MatchString(result) { // Multi use unique var
+				stringsToReplace := uniqRegexp.FindAllString(result, -1)
+				assignMultiUseUniques(stringsToReplace)
+				for _, v := range stringsToReplace { // This may run more times than needed but it doesn't affect run times.
+					result = strings.Replace(result, v, uniqStrings[v], -1)
+				}
 			} else {
 				contain = false
 			}
 		case false:
 			return
+		}
+	}
+}
+
+func assignMultiUseUniques(matches []string) {
+	for _, v := range matches {
+		if _, exists := uniqStrings[v]; !exists {
+			t := time.Now().UnixNano()
+			t = t / 1e6 // Keep millisecond
+			time.Sleep(time.Millisecond)
+			uniqueText := fmt.Sprintf("%d", t)
+			uniqStrings[v] = uniqueText
 		}
 	}
 }

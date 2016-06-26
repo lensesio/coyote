@@ -66,3 +66,12 @@
     - name: ignore exit code
       command: false
       ignore_exit_code: true
+
+- name: test persisting unique variables
+  entries:
+    - name: first instance
+      command: echo %UNIQUE_TEST% %UNIQUE_1%
+    - name: stdin
+      command: cat
+      stdin: |
+        Should be the same as before. First: %UNIQUE_TEST% Second: %UNIQUE_1%
