@@ -317,7 +317,12 @@ func main() {
 		fmt.Println("no errors")
 	} else {
 		fmt.Printf("errors were made: %d\n", errors)
-		os.Exit(1)
+		if errors > 255 {
+			errors = 255
+		}
+		// If we had 254 or less errors, the error code indicates the number of errors.
+		// If we had 255 or more errors, the error code is 255.
+		os.Exit(errors)
 	}
 }
 
