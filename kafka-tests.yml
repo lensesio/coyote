@@ -2,10 +2,9 @@
   title: Confluent CSD Tests
 # Tests we should add:
 # - kafka-avro-console-consumer
-# - test output of distributed connector
 # - test hdfs-sink (difficult, test with kerberos in standalone)
 
-- name: w/o SASL, w/o SSL
+- name: Brokers
   entries:
 # BASIC / PERFORMANCE
     - name: Create Topic (basic kafka)
@@ -27,6 +26,9 @@
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - name: Delete Topic (basic kafka)
       command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_01 --delete
+
+- name: REST Proxy
+  entries:
 # HTTP REST PROXY
     - name: Produce Avro Message (rest proxy, schema registry)
       # Please do not change the formatting (e.g. add new lines) of the JSON message below, REST Proxy is very sensitive.
@@ -100,6 +102,9 @@
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_binary --delete
       nolog: true
+
+- name: Schema Registry
+  entries:
 # SCHEMA REGISTRY
     - name: Register a new Schema version (schema registry)
       command: |
@@ -134,6 +139,9 @@
     - name: Get Schema Registry Configuration (schema registry)
       command: curl -vs --stderr - -XGET -i "http://cloudera.landoop.com:8081/config"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+
+- name: Connect
+  entries:
 # CONNECT
     - name: Get list of Connectors (connect distributed)
       command: curl -vs --stderr - -XGET -i "http://cloudera.landoop.com:8085/connectors"
