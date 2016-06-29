@@ -163,6 +163,11 @@
     - name: Sleep a bit to let the connector work
       command: sleep 9
       nolog: true
+    - name: Create coyote_consumer.properties
+      command: tee coyote_consumer.properties
+      stdin: |
+        security.protocol=SASL_PLAINTEXT
+        sasl.kerberos.service.name=kafka
     - name: "Run Console Consumer to fix Kafka's transient state (basic kafka)"
       command: |
         timeout 5
@@ -170,7 +175,8 @@
                                --bootstrap-server cloudera.landoop.com:9092
                                --topic coyote_connect_distributed_test-%UNIQUE_CD%
                                --from-beginning
-                               --property security.protocol=SASL_PLAINTEXT
+                               --zookeeper cloudera.landoop.com:2181/confluent
+                               --consumer.config coyote_consumer.properties
       env: [ "KAFKA_OPTS=-Djava.security.auth.login.config=/home/coyote/conf/jaas.conf" ]
       ignore_exit_code: true
     - name: Run Console Consumer (basic kafka)
@@ -180,7 +186,8 @@
                                --bootstrap-server cloudera.landoop.com:9092
                                --topic coyote_connect_distributed_test-%UNIQUE_CD%
                                --from-beginning
-                               --property security.protocol=SASL_PLAINTEXT
+                               --zookeeper cloudera.landoop.com:2181/confluent
+                               --consumer.config coyote_consumer.properties
       stdout_has: [ '/etc/fstab' ]
       env: [ "KAFKA_OPTS=-Djava.security.auth.login.config=/home/coyote/conf/jaas.conf" ]
       ignore_exit_code: true
@@ -239,11 +246,12 @@
                                --bootstrap-server cloudera.landoop.com:9092
                                --topic coyote-test-connect-standalone-accounts
                                --from-beginning
-                               --property security.protocol=SASL_PLAINTEXT
+                               --zookeeper cloudera.landoop.com:2181/confluent
+                               --consumer.config coyote_consumer.properties
       stdout_has: [ 'alice', 'bob' ]
       ignore_exit_code: true
       env: [ "KAFKA_OPTS=-Djava.security.auth.login.config=/home/coyote/conf/jaas.conf" ]
     - name: Delete Connect Standalone Test Topic (basic kafka)
       command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote-test-connect-standalone-accounts --delete
-    - command: rm -rf coyote_test.sqlite coyote_sqlite_connector.properties coyote_connect_standalone.properties coyote_connect.offset
+    - command: rm -rf coyote_test.sqlite coyote_sqlite_connector.properties coyote_connect_standalone.properties coyote_connect.offset coyote_consumer.properties
       nolog: true
