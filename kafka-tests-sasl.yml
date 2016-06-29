@@ -14,12 +14,12 @@
     - name: Performance Test (basic kafka)
       command: |
         kafka-producer-perf-test --topic coyote_test_01 --throughput 100000 --record-size 1000 --num-records 2000000
-                                 --producer-props bootstrap.servers="cloudera.landoop.com:9092"
-
+                                 --producer-props bootstrap.servers="cloudera.landoop.com:9092" security.protocol=SASL_PLAINTEXT
+      env: KAFKA_OPTS="-Djava.security.auth.login.config=/home/coyote/conf/jaas.conf"
 - name: REST Proxy
   entries:
 # HTTP REST PROXY
-   - name: List Topics (rest proxy)
+    - name: List Topics (rest proxy)
       command: curl -vs --stderr - "http://cloudera.landoop.com:8082/topics"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - name: Topic Information (rest proxy)
@@ -30,6 +30,7 @@
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - name: Delete Topic (basic kafka)
       command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote_test_01 --delete
+
     - name: Produce Avro Message (rest proxy, schema registry)
       # Please do not change the formatting (e.g. add new lines) of the JSON message below, REST Proxy is very sensitive.
       command: |
