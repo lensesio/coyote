@@ -15,7 +15,7 @@
       command: |
         kafka-producer-perf-test --topic coyote_test_01 --throughput 100000 --record-size 1000 --num-records 2000000
                                  --producer-props bootstrap.servers="cloudera.landoop.com:9092" security.protocol=SASL_PLAINTEXT
-      env: KAFKA_OPTS="-Djava.security.auth.login.config=/home/coyote/conf/jaas.conf"
+      env: [ KAFKA_OPTS="-Djava.security.auth.login.config=/home/coyote/conf/jaas.conf" ]
 - name: REST Proxy
   entries:
 # HTTP REST PROXY
