@@ -20,7 +20,7 @@
 - name: REST Proxy
   entries:
 # HTTP REST PROXY
-   - name: List Topics (rest proxy)
+    - name: List Topics (rest proxy)
       command: curl -vs --stderr - "http://cloudera.landoop.com:8082/topics"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - name: Topic Information (rest proxy)
