@@ -1,11 +1,25 @@
-A simple test agent. To build:
+# Coyote Tester #
+Part of Landoop™ test suite.
+
+
+Coyote is a simple test agent. It takes instructions from a yml configuration
+file with commands to setup (stdin, env vars) and run. It checks the output
+for errors and may further search for the presence or absence of specific
+regular expressions.
+
+It creates a html report with the tests, their outputs and some statistics.
+
+To build:
 
     go generate
     go build
 
 To execute:
 
-    ./coyote-tester -c kafka-tests.yml -out confluent.html
+    ./coyote-tester -c conf.yml
+
+_Notice:_ coyote stores the stderr and stdout of each command in memory, so it
+isn't suitable for testing commands with huge outputs.
 
 Sample entry in configuration yml file:
 
