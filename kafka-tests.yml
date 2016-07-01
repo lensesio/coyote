@@ -159,9 +159,8 @@
       command: curl -vs --stderr - -XGET -i "http://cloudera.landoop.com:8085/connectors/coyote_test_console_source-%UNIQUE_CD%"
       stdout_has: [ '/etc/fstab' ]
     - name: kafconcli (kafconcli, connect distributed)
-      command: kafconcli get coyote_test_console_source-%UNIQUE_CD%
+      command: kafconcli get -e "http://cloudera.landoop.com:8085" coyote_test_console_source-%UNIQUE_CD%
       stdout_has: [ '/etc/fstab' ]
-      env: [ "KAFKA_CONNECT_REST=http://cloudera.landoop.com:8085" ]
     - name: Sleep a bit to let the connector work
       command: sleep 9
       nolog: true
