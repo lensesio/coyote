@@ -85,3 +85,69 @@
 
     - command: rm -rf /home/coyote/landoop-intro
       nolog: true
+
+- name: Spark Tests
+  skip: _spark_tests_
+  entries:
+    - command: mkdir -p coyote-spark-test-app/src/main/scala
+      nolog: true
+    - name: Create Test Scala App
+      command: tee coyote-spark-test-app/src/main/scala/CoyoteTestApp.scala
+      stdin: |
+        /* SimpleApp.scala */
+        import org.apache.spark.SparkContext
+        import org.apache.spark.SparkContext._
+        import org.apache.spark.SparkConf
+
+        object CoyoteTestApp {
+          def main(args: Array[String]) {
+            val logFile = "CoyoteTestApp.scala" // file should be in HDFS
+            val conf = new SparkConf().setAppName("Coyote Application")
+            val sc = new SparkContext(conf)
+            val logData = sc.textFile(logFile, 2).cache()
+            val numAs = logData.filter(line => line.contains("a")).count()
+            val numBs = logData.filter(line => line.contains("b")).count()
+            val lineCount = logData.count()
+            println("Lines with a: %s, Lines with b: %s".format(numAs, numBs))
+            println("Linecount: %s".format(lineCount))
+            sc.parallelize(List(("Linecount: %s".format(lineCount))),1).saveAsTextFile("spark-results.txt")
+          }
+        }
+    - name: Create Sbt File
+      command: tee coyote-spark-test-app/main.sbt
+      stdin: |
+        name := "Coyote Test Project"
+        version := "1.0"
+        scalaVersion := "2.11.7"
+        libraryDependencies += "org.apache.spark" %% "spark-core" % "1.6.2"
+    - name: Put into HDFS a Test File
+      command: hadoop fs -put -f coyote-spark-test-app/src/main/scala/CoyoteTestApp.scala
+    - name: Build SBT Package
+      command: sbt package
+      workdir: coyote-spark-test-app
+    - name: Spark-submit Application (Local)
+      command: |
+        spark-submit
+          --class "CoyoteTestApp"
+          --master local[4]
+          coyote-spark-test-app/target/scala-2.11/coyote-test-project_2.11-1.0.jar
+      stdout_has: [ 'Linecount: 19' ]
+    - name: Verify via HDFS
+      command: hadoop fs -cat spark-results.txt/part-00000
+      stdout_has: [ 'Linecount: 19' ]
+    - command: hadoop fs -rm -r -f spark-results.txt
+      nolog: true
+    - name: Spark-submit Application (CDH Cluster)
+      command: |
+        spark-submit
+          --class "CoyoteTestApp"
+          --master yarn
+          --deploy-mode cluster
+          coyote-spark-test-app/target/scala-2.11/coyote-test-project_2.11-1.0.jar
+    - name: Verify via HDFS
+      command: hadoop fs -cat spark-results.txt/part-00000
+      stdout_has: [ 'Linecount: 19' ]
+    - command: hadoop fs -rm -r -f spark-results.txt
+      nolog: true
+    - command: rm -rf coyote-spark-test-app
+      nolog: true
