@@ -1,4 +1,5 @@
 # Coyote Tester #
+
 Part of Landoop™ test suite.
 
 
@@ -20,6 +21,8 @@ To execute:
 
 _Notice:_ coyote stores the stderr and stdout of each command in memory, so it
 isn't suitable for testing commands with huge outputs.
+
+## Examples
 
 Sample entry in configuration yml file:
 
@@ -48,3 +51,26 @@ Advanced options:
       stdin: hello
 
 ```
+
+## Skip
+
+An option you may add to your groups or per command is `skip`. This option will
+skip the test if set to (case insensitive) `true`. Please note that this isn't
+a boolean option but rather a string.
+
+The idea behind it is that you can have a test like this:
+
+```
+- name: test 1
+  skip: _test1_
+  entries:
+   ...
+   ...
+- name: test 2
+  skip: _test2_
+  entries:
+   ...
+   ...
+```
+
+And then you can easily switch off parts of the test using sed or other tools.

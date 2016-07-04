@@ -16,12 +16,14 @@ type Entry struct {
 	StderrNotExpect []string      `yaml:"stderr_not_has,omitempty"`
 	OnlyText        bool          `yaml:"only_text,omitempty"` // NI (Not Implemented)
 	IgnoreExitCode  bool          `yaml:"ignore_exit_code,omitempty"`
+	Skip            string        `yaml:"skip,omitempty"`
 }
 
 type EntryGroup struct {
 	Name    string  `yaml:"name"`
 	Entries []Entry `yaml:"entries"`
 	Title   string  `yaml:"title,omitempty"`
+	Skip    string  `yaml:"skip,omitempty"`
 }
 
 type Result struct {

@@ -75,3 +75,9 @@
       command: cat
       stdin: |
         Should be the same as before. First: %UNIQUE_TEST% Second: %UNIQUE_1%
+
+- name: skip test
+  skip: true
+  entries:
+    - name: skip or fail
+      command: exit 1

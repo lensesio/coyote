@@ -83,9 +83,19 @@ func main() {
 			continue
 		}
 
+		// Skip test if asked
+		if strings.ToLower(v.Skip) == "true" {
+			log.Printf("Skipping processing group: [ %s ]\n", v.Name)
+			continue
+		}
+
 		log.Printf("Starting processing group: [ %s ]\n", v.Name)
 		// For entries in group
 		for _, v := range v.Entries {
+			// Skip command if asked
+			if strings.ToLower(v.Skip) == "true" {
+				continue
+			}
 
 			// If unique strings are asked, replace the placeholders
 			v.Command = replaceUnique(v.Command)
