@@ -229,12 +229,22 @@ func main() {
 			return strings.Split(s, "\n")
 		},
 		"rotateColor": func(i int) string {
-			v := i % 3
+			v := i % 8
 			switch v {
 			case 1:
 				return "row header green"
 			case 2:
 				return "row header blue"
+			case 3:
+				return "row header purple"
+			case 4:
+				return "row header gray"
+			case 5:
+				return "row header yellow"
+			case 6:
+				return "row header orange"
+			case 7:
+				return "row header turquoise"
 			case 0:
 				return "row header"
 			}
