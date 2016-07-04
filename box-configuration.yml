@@ -1,6 +1,7 @@
 - name: coyote
   title: Box CDH Tests
 - name: Hadoop Tutorial
+  skip: _hadoop_tutorial_
   entries:
     - name: Clone Landoop Intro Repo
       command: git clone https://gitlab.com/landoop/landoop-intro.git
@@ -30,6 +31,7 @@
       nolog: true
 
 - name: Sqoop Tutorial
+  skip: _sqoop_tutorial_
   entries:
     - name: import
       command: |
@@ -56,6 +58,7 @@
       command: hive -e "USE coyote_tutorial; DROP TABLE orders; DROP DATABASE coyote_tutorial"
 
 - name: Kafka Tests
+  skip: _kafka_tests_
   entries:
     - name: Cloudera Env Vars (no fail)
       command: |
