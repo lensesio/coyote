@@ -5,6 +5,7 @@
 # - test hdfs-sink (difficult, test with kerberos in standalone)
 
 - name: Brokers
+  skip: _brokers_
   entries:
 # BASIC / PERFORMANCE
     - name: Create Topic (basic kafka)
@@ -18,6 +19,7 @@
       timeout: 90s
 
 - name: REST Proxy
+  skip: _rest_proxy_
   entries:
 # HTTP REST PROXY
     - name: List Topics (rest proxy)
@@ -105,6 +107,7 @@
       nolog: true
 
 - name: Schema Registry
+  skip: _schema_registry_
   entries:
 # SCHEMA REGISTRY
     - name: Register a new Schema version (schema registry)
@@ -142,6 +145,7 @@
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
 
 - name: Connect
+  skip: _connect_
   entries:
 # CONNECT
     - name: Get list of Connectors (connect distributed)
