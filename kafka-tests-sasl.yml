@@ -221,7 +221,7 @@
     - name: Create coyote_connect_standalone.properties
       command: tee coyote_connect_standalone.properties
       stdin: |
-        bootstrap.servers=cloudera.landoop.com:10092
+        bootstrap.servers=cloudera.landoop.com:19092
         security.protocol=PLAINTEXT
         key.converter=io.confluent.connect.avro.AvroConverter
         key.converter.schema.registry.url=http://cloudera.landoop.com:8081
