@@ -25,10 +25,10 @@ To build:
 
 To execute with a simple configuration file:
 
-    ./coyote-tester -c conf.yml
+    ./coyote -c test.yml
 
 The best example for understanding how to setup a coyote test, would be the
-[kafka-tests.yaml](https://github.com/Landoop/coyote/blob/master/kafka-tests.yml)
+[kafka-tests.yaml](https://github.com/Landoop/coyote/blob/master/tests/kafka-tests.yml)
 which we use to test our Confluent Platform setup for the
 [Landoop Boxes](https://docs.landoop.com/pages/your-box/).
 
