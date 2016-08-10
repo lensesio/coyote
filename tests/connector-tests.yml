@@ -1,0 +1,66 @@
+- name: coyote
+  title: Kafka Connect Tests
+
+- name: Setup
+  skip: _setup_
+  entries:
+    - name: Download connector package
+      command: wget -nc https://archive.landoop.com/third-party/stream-reactor/stream-reactor-20160810-cp-3.0.0-693b638.tar.gz
+    - name: Extract connector package
+      command: tar xzf stream-reactor-20160810-cp-3.0.0-693b638.tar.gz
+
+- name: "Stream Reactor: Yahoo Finance"
+  skip: _yahoo_finance_
+  entries:
+    - name: Create coyote-yahoo-finance.properties.json
+      command: tee coyote-yahoo-finance.properties.json
+      stdin: |
+        {
+          "name": "coyote-yahoo-finance-%UNIQUE_YF%",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.yahoo.source.YahooSourceConnector",
+            "tasks.max": "1",
+            "connect.yahoo.source.fx.topic": "coyote-yahoo-fx",
+            "connect.yahoo.source.fx.subscriptions": "USDGBP=,USDGBP=,EURGBP=",
+            "connect.yahoo.source.stocks.topic": "coyote-yahoo-stocks-%UNIQUE_YF%",
+            "connect.yahoo.source.stocks.subscriptions": "GOOGL,MSFT,AAPL",
+            "connect.yahoo.source.error.policy": "THROW",
+            "connect.yahoo.source.poll.interval": "20000"
+          }
+        }
+    - name: Create Yahoo Finance Connector
+      command: |
+        curl -vs --stderr - -X POST -H "Content-Type: application/json" -H "Accept: application/json"
+             -d @coyote-yahoo-finance.properties.json
+             "http://cloudera.landoop.com:8085/connectors"
+    - name: "Get Connector's Configuration"
+      command: curl -vs --stderr - -XGET -i "http://cloudera.landoop.com:8085/connectors/coyote-yahoo-finance-%UNIQUE_YF%"
+      stdout_has: [ 'GOOGL', "MSFT", "AAPL" ]
+    - name: Sleep a bit to let the connector work
+      command: sleep 30
+      nolog: true
+    - name: "Run Console Consumer to fix Kafka's transient state (basic kafka)"
+      command: |
+        timeout 60
+        kafka-console-consumer --new-consumer
+                               --bootstrap-server cloudera.landoop.com:9092
+                               --topic coyote-yahoo-finance-%UNIQUE_YF%
+                               --from-beginning
+      ignore_exit_code: true
+    - name: Run Console Consumer (basic kafka)
+      command: |
+        timeout 60
+        kafka-console-consumer --new-consumer
+                               --bootstrap-server cloudera.landoop.com:9092
+                               --topic coyote-yahoo-finance-%UNIQUE_YF%
+                               --from-beginning
+      stdout_has: [ 'EURGBP=X' ]
+      ignore_exit_code: true
+    - name: Delete connector
+      command:  curl -vs --stderr - -XDELETE "http://cloudera.landoop.com:8085/connectors/coyote-yahoo-finance-%UNIQUE_YF%"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - name: Delete Connect Distributes Test Topic (basic kafka)
+      command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote-yahoo-finance-%UNIQUE_YF% --delete
+
+    - command: rm -rf coyote-yahoo-finance.properties.json
+      nolog: true
