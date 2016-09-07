@@ -30,6 +30,9 @@
     - command: hadoop fs -rm -r input.md results results-2
       nolog: true
 
+    - command: rm -rf /home/coyote/landoop-intro
+      nolog: true
+
 - name: Sqoop Tutorial
   skip: _sqoop_tutorial_
   entries:
@@ -82,9 +85,6 @@
       command: |
         /opt/confluent-2.0.1/bin/kafka-producer-perf-test --topic test-rep-one --throughput 100000 --record-size 1000 --num-records 1000000
         --producer-props bootstrap.servers="cloudera.landoop.com:29092"
-
-    - command: rm -rf /home/coyote/landoop-intro
-      nolog: true
 
 - name: Spark Tests
   skip: _spark_tests_
