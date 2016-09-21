@@ -38,10 +38,10 @@ import (
 //go:generate go run template/include_templates.go
 
 var (
-	configFile     = flag.String("c", "config.yml", "configuration file")
+	configFile     = flag.String("c", "coyote.yml", "configuration file")
 	defaultTimeout = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
 	title          = flag.String("title", "Coyote Tests", "title to use for report")
-	outputFile     = flag.String("out", "out.html", "filename to save the results under, if exists it will be overwritten")
+	outputFile     = flag.String("out", "coyote.html", "filename to save the results under, if exists it will be overwritten")
 )
 
 var (
