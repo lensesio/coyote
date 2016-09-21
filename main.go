@@ -144,7 +144,14 @@ func main() {
 			//   cmd := exec.Command("echo", args[0:]...)
 			// else
 			//   ...
-			cmd := exec.Command(args[0], args[1:]...)
+			var cmd *exec.Cmd
+			if len(args) == 0 { // Empty command?
+				log.Printf("Entry %s is missing the command field. Aborting.\n", v.Name)
+				os.Exit(255)
+			} else {
+				cmd = exec.Command(args[0], args[1:]...)
+			}
+
 			if len(v.WorkDir) > 0 {
 				cmd.Dir = v.WorkDir
 			}
