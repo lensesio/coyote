@@ -113,8 +113,17 @@ func main() {
 			// If unique strings are asked, replace the placeholders
 			v.Command = replaceUnique(v.Command)
 			v.Stdin = replaceUnique(v.Stdin)
-			for k2, v2 := range v.EnvVars {
-				v.EnvVars[k2] = replaceUnique(v2)
+			var replaceInArrays = [][]string{
+				v.EnvVars,
+				v.StderrExpect,
+				v.StderrNotExpect,
+				v.StdoutExpect,
+				v.StdoutNotExpect,
+			}
+			for _, v2 := range replaceInArrays {
+				for k3, v3 := range v2 {
+					v2[k3] = replaceUnique(v3)
+				}
 			}
 
 			// If timeout is missing, set the default. If it is <0, set infinite.
