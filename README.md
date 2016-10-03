@@ -35,7 +35,7 @@ which we use to test our Confluent Platform setup for the
 *Important:* coyote stores the stderr and stdout of each command in memory, so
 it isn't suitable for testing commands with huge outputs.
 
-<img src="./coyote.png" alt="coyote screenshot" type="image/png" width="900">
+<img src="https://storage.googleapis.com/wch/coyote.png" alt="coyote screenshot" type="image/png" width="900">
 
 ## Simple Examples
 
