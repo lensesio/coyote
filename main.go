@@ -42,6 +42,7 @@ var (
 	defaultTimeout = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
 	title          = flag.String("title", "Coyote Tests", "title to use for report")
 	outputFile     = flag.String("out", "coyote.html", "filename to save the results under, if exists it will be overwritten")
+	version        = flag.Bool("version", false, "print coyote version")
 )
 
 var (
@@ -57,6 +58,11 @@ func init() {
 }
 
 func main() {
+	if *version == true {
+		fmt.Printf("This is Landoop's Coyote %s.\n", Version)
+		os.Exit(0)
+	}
+
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	logger.Printf("Starting coyote-tester\n")
 
