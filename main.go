@@ -35,7 +35,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-//go:generate go run template/include_templates.go
+//go:generate go run template-generate/include_templates.go
+//go:generate go run version-generate/main.go
 
 var (
 	configFile     = flag.String("c", "coyote.yml", "configuration file")
