@@ -1,19 +1,20 @@
 - name: coyote
   title: Sample YML
+
 - name: test
   entries:
-    - name: ls
+    - name: ls command
       command: |
         ls
         -lR
         .
-    - name: echo
+    - name: echo command
       command: echo hello
-    - name: error
+    - name: error unless you are root
       command: ls /root
 
 
-- name: more tests, oh yeah!
+- name: moar tests
   entries:
     - name: base64
       command: |
@@ -36,6 +37,7 @@
     - name: echo a var
       command: bash -c 'echo "$TEST"'
       env: [ TEST="hello world" ]
+
 - name: test text search
   entries:
     - name: match stdout
