@@ -64,7 +64,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime)
 	logger.Printf("Starting coyote-tester\n")
 
 	// Open yml configuration
@@ -105,11 +105,11 @@ func main() {
 
 		// Skip test if asked
 		if strings.ToLower(v.Skip) == "true" {
-			log.Printf("Skipping processing group: [ %s ]\n", v.Name)
+			logger.Printf("Skipping processing group: [ %s ]\n", v.Name)
 			continue
 		}
 
-		log.Printf("Starting processing group: [ %s ]\n", v.Name)
+		logger.Printf("Starting processing group: [ %s ]\n", v.Name)
 		// For entries in group
 		for _, v := range v.Entries {
 			// Skip command if asked
@@ -143,7 +143,7 @@ func main() {
 			args, err := shellwords.Parse(v.Command)
 
 			if err != nil {
-				log.Printf("Error when parsing command [ %s ] for [ %s ]\n", v.Command, v.Name)
+				logger.Printf("Error when parsing command [ %s ] for [ %s ]\n", v.Command, v.Name)
 			}
 
 			// TODO
@@ -153,7 +153,7 @@ func main() {
 			//   ...
 			var cmd *exec.Cmd
 			if len(args) == 0 { // Empty command?
-				log.Printf("Entry %s is missing the command field. Aborting.\n", v.Name)
+				logger.Printf("Entry %s is missing the command field. Aborting.\n", v.Name)
 				os.Exit(255)
 			} else {
 				cmd = exec.Command(args[0], args[1:]...)
@@ -192,13 +192,13 @@ func main() {
 			textErr := textTest(v, stdout, stderr)
 
 			if err != nil && timerLive && !v.IgnoreExitCode {
-				log.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
+				logger.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
 			} else if err != nil && !timerLive {
-				log.Printf("Timeout, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
+				logger.Printf("Timeout, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
 			} else if textErr != nil {
-				log.Printf("Output Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, textErr.Error(), strconv.Quote(stdout))
+				logger.Printf("Output Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, textErr.Error(), strconv.Quote(stdout))
 			} else {
-				log.Printf("Success, command '%s', test '%s'. Stdout: %s\n", v.Command, v.Name, strconv.Quote(stdout))
+				logger.Printf("Success, command '%s', test '%s'. Stdout: %s\n", v.Command, v.Name, strconv.Quote(stdout))
 			}
 
 			if v.NoLog == false {
@@ -330,12 +330,12 @@ func main() {
 	t, err := template.New("output").Funcs(funcMap).Parse(mainTemplate)
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	} else {
 		f, err := os.Create(*outputFile)
 		defer f.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 
 		} else {
 			h := &bytes.Buffer{}
@@ -360,19 +360,20 @@ func main() {
 			// err = t.ExecuteTemplate(h, "template.html", data)
 			err = t.Execute(h, data)
 			if err != nil {
-				log.Println(err)
+				logger.Println(err)
 			}
 			f.Write(h.Bytes())
+			j, _ := json.Marshal(data)
+			fmt.Println(string(j))
+
 		}
 
 	}
 
-	j, err := json.Marshal(resultsGroups)
-	fmt.Println(string(j))
 	if errors == 0 {
-		fmt.Println("no errors")
+		logger.Println("no errors")
 	} else {
-		fmt.Printf("errors were made: %d\n", errors)
+		logger.Printf("errors were made: %d\n", errors)
 		if errors > 255 {
 			errors = 255
 		}
