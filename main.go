@@ -21,6 +21,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
@@ -28,7 +29,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 
 	shellwords "github.com/mattn/go-shellwords"
@@ -44,17 +44,37 @@ var (
 	title          = flag.String("title", "Coyote Tests", "title to use for report")
 	outputFile     = flag.String("out", "coyote.html", "filename to save the results under, if exists it will be overwritten")
 	version        = flag.Bool("version", false, "print coyote version")
+	customTemplate = flag.String("template", "", "override internal golang template with this")
 )
 
 var (
+	logger      *log.Logger
 	uniqStrings = make(map[string]string)
 	uniqRegexp  = regexp.MustCompile("%UNIQUE_[0-9A-Za-z_-]+%")
+	t           *template.Template
 )
 
 func init() {
+	logger = log.New(os.Stderr, "", log.Ldate|log.Ltime)
 	flag.Parse()
+
 	if *defaultTimeout == 0 {
 		*defaultTimeout = time.Duration(365 * 24 * time.Hour)
+	}
+
+	var err error
+	var templateData = make([]byte, 0)
+	if len(*customTemplate) == 0 {
+		t, err = template.New("").Delims("<{=(", ")=}>").Parse(mainTemplate)
+	} else {
+		templateData, err = ioutil.ReadFile(*customTemplate)
+		if err == nil {
+			t, err = template.New("").Delims("<{=(", ")=}>").Parse(string(templateData))
+		}
+	}
+	if err != nil {
+		logger.Printf("Error while trying to load template: %s\n", err)
+		os.Exit(255)
 	}
 }
 
@@ -64,7 +84,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime)
 	logger.Printf("Starting coyote-tester\n")
 
 	// Open yml configuration
@@ -244,91 +263,6 @@ func main() {
 		resultsGroups = append(resultsGroups, resultGroup)
 	}
 
-	rotateColorCanary := 0
-	funcMap := template.FuncMap{
-		"isEven": func(i int) bool {
-			if i%2 == 0 {
-				return true
-			}
-			return false
-		},
-		"showmore": func(s []string) bool {
-			if len(s) > 1 {
-				return true
-			}
-			return false
-		},
-		"splitString": func(s string) []string {
-			if s == "" {
-				return []string{""}
-			}
-			return strings.Split(s, "\n")
-		},
-		"rotateColor": func(i int) string {
-			v := i % 8
-			switch v {
-			case 1:
-				return "row header green"
-			case 2:
-				return "row header blue"
-			case 3:
-				return "row header purple"
-			case 4:
-				return "row header gray"
-			case 5:
-				return "row header yellow"
-			case 6:
-				return "row header orange"
-			case 7:
-				return "row header turquoise"
-			case 0:
-				return "row header"
-			}
-			return "row header"
-		},
-		"rotateColorCharts": func(ext, int int) string {
-			colors := []string{
-				"#2383c1",
-				"#64a61f",
-				"#7b6788",
-				"#a05c56",
-				"#961919",
-				"#d8d239",
-				"#e98125",
-				"#d0743c",
-				"#635122",
-				"#6ada6a",
-				"#0b6197",
-				"#7c9058",
-				"#207f32",
-				"#44b9af",
-				"#bca349",
-			}
-			v := rotateColorCanary % (len(colors) - 1)
-			rotateColorCanary++
-			return colors[v]
-		},
-		"colorStatus": func(s string) string {
-			switch s {
-			case "error", "timeout":
-				return "red"
-			case "ok":
-				// return "green" // green disabled because status ok should be expected
-				return ""
-			default:
-				return ""
-			}
-			return ""
-		},
-		"returnFirstLine": func(s []string) string {
-			r := strings.Split(s[0], "<br>")
-			r = strings.Split(r[0], "\n")
-			return r[0]
-		},
-	}
-	//t, err := template.New("").Funcs(funcMap).ParseFiles("template.html")
-	t, err := template.New("output").Funcs(funcMap).Parse(mainTemplate)
-
 	if err != nil {
 		logger.Println(err)
 	} else {
@@ -357,14 +291,20 @@ func main() {
 				*title,
 			}
 
+			jsonData, err := json.Marshal(data)
+			if err != nil {
+				logger.Println("Coyote error when creating json.")
+				os.Exit(255)
+			}
+
+			// // fmt.Println(string(j))
+
 			// err = t.ExecuteTemplate(h, "template.html", data)
-			err = t.Execute(h, data)
+			err = t.Execute(h, template.JS(jsonData))
 			if err != nil {
 				logger.Println(err)
 			}
 			f.Write(h.Bytes())
-			j, _ := json.Marshal(data)
-			fmt.Println(string(j))
 
 		}
 
