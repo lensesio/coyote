@@ -20,7 +20,7 @@ mainTemplate = `<html lang="en">
         .test-name { width:200px; }
         .test-time { width: 20px; }
         .test-icon { width: 10px; }
-		.test-icon,.test-time ,.test-name,.test-command, .test-code  { font-size: 15px;font-weight: bold;color: #333;}
+        .test-icon,.test-time ,.test-name,.test-command, .test-code  { font-size: 12px;font-weight: bold;color: #333;}
         .test-code { width: 20px; }
         .main-row { cursor: pointer; }
         .main-row:hover { background-color: #ddd;}
@@ -34,18 +34,18 @@ mainTemplate = `<html lang="en">
         .td-hidden {overflow:hidden; padding: 20px;}
         .td-hidden-std {background-color: rgba(244,244,244,0.8);padding:10px;}
         .td-hidden-error {background-color: rgba(212,72,72,0.2);padding:10px;}
-		md-card md-card-header md-card-avatar+md-card-header-text  {16px;color:#fff;cursor:pointer;}
-         md-content.md-default-theme, md-content {
-    color: rgba(0,0,0,0.87);
-    background-color: rgb(220,220,220);
-}
+        md-card md-card-header md-card-avatar+md-card-header-text  {16px;color:#fff;cursor:pointer;}
+        md-content.md-default-theme, md-content {
+             color: rgba(0,0,0,0.87);
+             background-color: rgb(220,220,220);
+        }
         .md-avatar-small { width:10px; height:30px;}
         .icon-header-button {font-size:20px;}
         .icon-status-header-passed {width:20px; margin:10px; font-size:20px; color:green}
         .icon-status-header-failed {width:20px; margin:10px; font-size:20px; color:red}
         .icon-status-passed {width:10px; color:green}
         .icon-status-failed {width:10px; color:red}
-        .summary {font-size:12px; padding-right:10px;}
+        .summary {font-size:14; padding-right:10px;}
         .dark-background {background-color:#2b2b2b; color: #ccc;}
         .logo-section {padding-left:30px;}
         .box {color:#ccc; background-color: #242424;text-align:center; padding: 13px 16px 12px;}
@@ -57,6 +57,7 @@ mainTemplate = `<html lang="en">
         .progress-bar {width:100%; -webkit-animation: fullexpand 10s ease-out;}
         .footer-github {text-align:center;margin-bottom:5px;}
         .footer-landoop-img {width:20px;float: left;padding-right:5px;}
+        .md-title {font-size:20px;}
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
@@ -71,8 +72,9 @@ mainTemplate = `<html lang="en">
     <div layout="row" class="dark-background logo-section">
         <div flex="5"></div>
         <div flex layout="column" layout-align="center start">
-            <h1 class="logo"><img src="data:image/gif;base64,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" height="40" style="margin-bottom: -5px;"> Coyote</h1>
-            <p class="summary execution-details">{{datalist.Title}} | Executed at {{datalist.Date}}</p>
+            <h1 class="logo"><img src="data:image/gif;base64,R0lGODlh8ABtAaECAAsMAf3//P///////yH5BAEKAAIALAAAAADwAG0BAAL+lI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2jef6zvf+DwwKh8Si8YhMKpfMpvMJjUqn1Kr1is1qt9yu9wsOix+BcnmMhpnN6bZqzXbLS/D4HG3/1M/3MTy0F9AntgcSKDjodagXmKjY6LHoyHWIuFE52SV5iZmZVWmZAer52akxSnoFGmqxmqrqihH7WjXbikpLZVuxm/u0ykrR69sEHCwBTBxlLDusnGR8TJb87FRYyOtcfXSNPUG9zYTtjQweDl1nABkRfb40Tj5t7m7kHd/QeE8/RJ7O7q9vXxB/BwImgPdHYD2CAgwiQLhG4cKIDx2qS9iQoUT+IPcs2tO40UdHhx8xhvyhjyRBiydtpAzYD2RLHS9lZjS5buYOmCM1stQZgyfInhSB0rR5EyfRPEZvqFRqsiDSpkGjKoCUU6pVqjOmXkwotChXGiyjSfs5NkVZZgzQpj3xk21br29RxNX2VWxdF3S1bpq7da/avnmzXiUsGBBiXPgQJ2YUGHBft48jOU6qVzLTynAjN/Z8EDRnyJn/mQHwTfToDpRDZyu9WrFq0nxi07nMabbtC61zw97te3Nn3cBTE2eNu7i83yR6K3fg/FTy55prr4hOveJxy9uzh+7OAbt3zNavTx9veDB49OeDlx9vnPlw4fCX03+znnp68/L+63/vr5Vs9/n3H4DtHZYfcPshOOAtCe62YIHSNPNgbBFKOKGDAHr3FwTiYUjgAqaYtmE5JSo3IokNvnYihB2q+J50LdqWookVFhZjdoyxuGJ8PdL4Io858nbgWztq+COMGbp4oY1JelgkVUdSOCN0N+qElzAfSlhcO8htqV2VEpl1ZZAyikkPmVHiiGZ1S56k5pVsDinKmr7E+aSTefpIZ0h4vknlnnwCqpCadskJIlfzHCqolm1WM6Va6jXqTo2/IHqnpeJgmmmWRNi5jVnvgAqpoRM9us+fZnZFajiqgikgpX6+iqoIsI5JK6H81YolnjncahSZR/FqZKQytFr+F7Dcybqasl8yO5qz4XFaLLVn9skesYYgmxa37umKorXXYqujuHWa25S344LbJbpEutsrvEKyy6S229pbLb7LkvuctM/yG66++waAWog49uCvlPIiCXC90N628EYJTxsxrhUPajB59O768F7qUixwsB9/a/DEIHecL8rNXZwqy46qPNbIJ29cmcn/0vyYzTOHqLN7PMtMcn09Bw3f0Ov6Z/S5IbcE9M04p9wwqy4/k/TR2S4da9SJNe301TAz+jXTXHdd7tTvYt2y2WeHLfHYZPfr9sxPK4z2CFUrc7fc+sV9895qBzq3yH+vHThQfL/tsNZOHf5K3ohb6LjeCjL+LnnihVc1eCJNikR5JpE/ztnmnGfex+cDW14M6XOIjlLng5g+8OVp142f6pi75HrsacBRMOa2K832p5TDTpviULBuN/G6h6HppMH7bnzqyGcdPcK/15739ELkzteqYNPegvIc86399tyPDz6D6bMgvvOHt3/v+mQ1P9/z81+/svf1V8/R+d+T7z9bBTB/9DMB/KhXCk8lb4Dxsx/ujLU/2VkPf7ErX+WscMAGFpCADnxgB6EHQQ5+8H4j7J4xeoc9+YFQF/lwWwZFyEKAuJCBMJRCIAqWNAsi4YXAs47RdLhDGgLOh1wDIjeEyLDyDM2IR6RgEllRBxQakIcQK+H+/97TNCY20YpTlAnQtLhFLoowRjIDYxj550HYjOyGzEOinghWnQiiUQluVNKEPmbGIKpQgJ5RVx71uEcNZsiPdfzfpqbirT+eUYJq8Aq3FLnIUYnmkVRM4RyPRRdkQTKS6FBNqzZ5KjEKEkbUu+QhA7k8+0gQAKAMpSlfgBZQtbIIs4ygnor3ylOKEpe3dFouJYnKC6rSl4zU5S/Zt5gK1ZKWhfxMiYq0TGY6EUq6OZD+vlDJYWKsh8c0pje3+cRiSi+YfQPnvMQ5zl0W72WCuiY2s6lNPoXzdc20UotwE01OAjNqlHEnGOAZzzcOqpvWqKcz+UkYf7ZxmqRkZ4/+8tlJcpbToW+CaEQl6rN5qVKd/LAoH/f0FINiUqRcSuJBOSpNkvpFcWFhaJ1KiU73EQ6LHh3fB1hZ04lqNEwuBRwIcKrS6eQkp+gr5Rm5uVKUXlGCRLXaE+eEhT82dYjcVOg+YTZVkw4xq8iUJUAPti6VVhWBwsvPoqIKLK6ac6Y9xeUrv7qlDcZQTmpVktyU2kiv9hRMVqWmAt2HsrpuNJXE7OsYTQlQOynWV1JbU2Idq61XNfZG8KRirvIKq8oi8bImNKyIslnJqIgKfXwtpFgx9EW5OLV1bfWrzYS1s4Gc9rOefeNfB9u/1tr2l6NADRNBO9uT2itFcQWubiX+AFTIvui3dfzqPL91HyMK1k2wwA4EmctQ5z73nOSSbmiD+4DkEgcUUnRT4L573AqI10AhRC10c4tROS6pvbRNEHrja4L1Dum27l0tD7S71WDwt75tMi5+bZnUKHl3mgDeaoKJBcT74hWwqvUlUuE74aXK9ak9lG16A0xIs7qxwSB2oA4lTNCd0NfCbMVwiocVRdI6mLUHlmNnxYTimKo4btHJsSZ43OPsgnetRZ2pi3UMY1EGmcFDJjKFjXxkSgCwOwbO8BUx26jmNtmuWGaplj9MOBBqrcov/tWUt0NmJJvZZdPTLJh32mV6pXkLkWvzl9/s5K7e07Rbtmcwkef+ZjxzeaTVDLSVx0jCExn60B9VKuseK2jcTjZJ0xWumid9aTsO1HyRFq4N9DvQMt8Vg9x79IrjnGlYnq+fZ60BiV0r6k3vdrqVZvHikglbV/eZTUnOE2MJzej39npjcUp0rC157HOWuKmvVl+NeR3W2tr6qgHMbKuRbcwNF7mCgWy2xgZcxbBJW5iLrLCqOTVucqdUVecu06kX+GyK0mrb0f4zuEmIQnYDFrqf03e57w1l7sIuV8H2s7nh/dBfY5rgHT14o/fr7zQSXNukXebEKa7nixf7JnnpeFK+0nHJInviHta4yU++ivKGm+HHQ7nLOVvxjVf35TQH+F1Hu9A5mtPc2BjPuc7/lLFZ/7zTQS+60Y+O9KQrfelMb7rTnw71qEt96lSvutWvjvWsa33rXO+617/e9AIAADs=" height="40" style="margin-bottom: -5px;"> Coyote | 
+                <p class="execution-details md-headline" style="display: inline;">{{datalist.Title}}, <span class="md-subhead">{{datalist.Date}}</span></p>
+            </h1>
         </div>
     </div>
 
@@ -83,7 +85,6 @@ mainTemplate = `<html lang="en">
                 <div class="box">
                     <h4> <b>{{ percentsucc }}%</b> Passed</h4>
                     <h6 style="margin-top:-15px;"> Total tests: {{datalist.TotalTests}} </h6>
-                    <progress max="100" value="{{ percentsucc }}" class="progress-bar"></progress>
                 </div>
 
                 <md-content style="overflow:auto;height:265px;">
@@ -99,15 +100,16 @@ mainTemplate = `<html lang="en">
                                 <h3 style="color:#fff;">{{d.Name}}</h3>
                                 <p style="color:#ccc; padding-top: 5px;">Passed {{ d.Passed }} out of {{ d.Total }} | {{d.TotalTime | number:2}}s  </p>
                             </div>
+                        <md-divider ></md-divider>
                         </md-list-item>
+
                     </md-list>
                 </md-content>
 
             </div>
-
             <div layout="column" flex>
-                <div  class="box">
-                    <h3>Total duration: <b>{{datalist.TotalTime | number:2}}s</b></h3>
+                <div class="box">
+                    <h3 style="display:inline-block;">Total duration: <b>{{datalist.TotalTime | number:2}}s</b></h3>
                     <div flex id="testTimes" style="display:inline;"></div>
                 </div>
             </div>
@@ -120,14 +122,14 @@ mainTemplate = `<html lang="en">
         <div flex>
             <h3>Results</h3>
             <md-card ng-repeat="test in datalist.Results" ng-init="cardIndex = $index" id="testNo{{$index}}"  >
-                <md-card-header class="dark-background" ng-click="toggleCard(cardIndex)">
+                <md-card-header class="dark-background md-title" ng-click="toggleCard(cardIndex)" style="padding-top: 6px; padding-bottom: 6px;">
                     <md-card-avatar layout-align="center start ">
                         <i style="margin-top:10px"
                            ng-class="{ 'fa fa-times icon-status-failed': test.Errors > 0, 'fa fa-check icon-status-passed': test.Errors == 0,  }" aria-hidden="true">
                         </i>
                     </md-card-avatar>
                     <md-card-header-text layout-align="center start">
-                        <span class="md-title">{{test.Name}}</span>
+                        <span class="md-title" style="font-size:20px;">{{test.Name}}</span>
                     </md-card-header-text>
                     <md-button class="md-icon-button" aria-label="More">
                         <i  ng-hide="showcard[cardIndex]" class="fa fa-angle-double-up icon-header-button" aria-hidden="true"></i>
@@ -317,8 +319,8 @@ mainTemplate = `<html lang="en">
 			"location": "bottom-left"
 		    },
 		    "size": {
-			"canvasHeight": 300,
-			"canvasWidth": "550",
+			"canvasHeight": 350,
+			"canvasWidth": 650,
 			"pieInnerRadius": "72%",
 			"pieOuterRadius": "85%"
 		    },
