@@ -109,6 +109,7 @@ func main() {
 		var results []Result
 		var resultGroup = ResultGroup{
 			Name:      v.Name,
+			Type:      v.Type,
 			Results:   results,
 			Passed:    0,
 			Errors:    0,
@@ -252,6 +253,7 @@ func main() {
 				t.Stdout = recurseClean(t.Stdout)
 				t.Stderr = recurseClean(t.Stderr)
 
+				t.Test = v
 				resultGroup.Results = append(resultGroup.Results, t)
 				resultGroup.TotalTime += t.Time
 			}

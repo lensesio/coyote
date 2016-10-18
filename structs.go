@@ -39,6 +39,7 @@ type EntryGroup struct {
 	Entries []Entry `yaml:"entries"`
 	Title   string  `yaml:"title,omitempty"`
 	Skip    string  `yaml:"skip,omitempty"`
+	Type    string  `yaml:"type,omitempty"`
 }
 
 type Result struct {
@@ -49,10 +50,12 @@ type Result struct {
 	Stdout  []string
 	Stderr  []string
 	Exit    string
+	Test    Entry
 }
 
 type ResultGroup struct {
 	Name      string
+	Type      string
 	Results   []Result
 	Passed    int
 	Errors    int
