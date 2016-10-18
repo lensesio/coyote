@@ -17,11 +17,12 @@ mainTemplate = `<html lang="en">
         h1, h2, h3, h4 { font-weight:200 }
 
 
-        .test-name { width:200px; }
-        .test-time { width: 20px; }
-        .test-icon { width: 10px; }
+        .test-name { width:25%; }
+        .test-time { width: 10%; }
+        .test-icon { width: 5%; }
         .test-icon,.test-time ,.test-name,.test-command, .test-code  { font-size: 12px;font-weight: bold;color: #333;}
-        .test-code { width: 20px; }
+        .test-code { width: 10%; }
+        .test-command {width:50%;}
         .main-row { cursor: pointer; }
         .main-row:hover { background-color: #ddd;}
         table {border-spacing: 0;}
@@ -57,7 +58,9 @@ mainTemplate = `<html lang="en">
         .progress-bar {width:100%; -webkit-animation: fullexpand 10s ease-out;}
         .footer-github {text-align:center;margin-bottom:5px;}
         .footer-landoop-img {width:20px;float: left;padding-right:5px;}
-        .md-title {font-size:20px;}
+         md-card md-card-header md-card-avatar+md-card-header-text .md-title {font-size:18px;}
+		.md-headline { font-size: 18px}
+		.md-subhead {font-size: 14px;line-height: 24px;}
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
@@ -87,7 +90,7 @@ mainTemplate = `<html lang="en">
                     <h6 style="margin-top:-15px;"> Total tests: {{datalist.TotalTests}} </h6>
                 </div>
 
-                <md-content style="overflow:auto;height:265px;">
+                <md-content style="overflow:auto;height:291px;background:#242424">
                     <md-list class="md-dense box" flex >
 
 
@@ -129,7 +132,7 @@ mainTemplate = `<html lang="en">
                         </i>
                     </md-card-avatar>
                     <md-card-header-text layout-align="center start">
-                        <span class="md-title" style="font-size:20px;">{{test.Name}}</span>
+                        <span class="md-title">{{test.Name}}</span>
                     </md-card-header-text>
                     <md-button class="md-icon-button" aria-label="More">
                         <i  ng-hide="showcard[cardIndex]" class="fa fa-angle-double-up icon-header-button" aria-hidden="true"></i>
@@ -165,7 +168,7 @@ mainTemplate = `<html lang="en">
                                     {{dtest.Command}}
                                 </code>
                             </td>
-                            <td style="text-align:center;">{{dtest.Exit}}</td>
+                            <td>{{dtest.Exit}}</td>
                         </tr>
                         <tr>
                             <td colspan="6" ng-show="showRow[rowIndex+''+cardIndex]" class="td-hidden">
@@ -229,6 +232,8 @@ mainTemplate = `<html lang="en">
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
+
 
 
 <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
@@ -255,8 +260,11 @@ mainTemplate = `<html lang="en">
 	        }
 
 	        $scope.gotoTest = function(testid) {
+	            var oldlocation = $location.hash();
 	            $location.hash(testid);
-	            $anchorScroll();
+                $anchorScroll();
+                //reset to old to keep any additional routing logic from kicking in
+                $location.hash(oldlocation);
 	        }
 
 	        $scope.consoleStdout = function(stdout) {
