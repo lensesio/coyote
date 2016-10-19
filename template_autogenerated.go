@@ -248,7 +248,7 @@ mainTemplate = `<html lang="en">
      angular.module('CoyoteApp', ['ngMaterial', 'ngAnimate', 'ngAria'])
             .controller('MainCtrl', function ($scope, $log, $location, $anchorScroll, $sce) {
 
-            var data = <{=( . )=}> ;
+            var data = <{=( .Data )=}> ;
 
 	        function getRandomColor() {
 		    var letters = '0123456789ABCDEF';
@@ -391,6 +391,7 @@ mainTemplate = `<html lang="en">
     </script>
 
 </body>
+<{=( .Version )=}>
 </html>
 `
 )
