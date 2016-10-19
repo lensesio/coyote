@@ -125,7 +125,7 @@ mainTemplate = `<html lang="en">
         <div flex>
             <h3>Results</h3>
             <md-card ng-repeat="test in datalist.Results" ng-init="cardIndex = $index" id="testNo{{$index}}"  >
-                <md-card-header class="dark-background md-title" ng-click="toggleCard(cardIndex)" style="padding-top: 6px; padding-bottom: 6px;">
+                <md-card-header class="dark-background md-title" ng-click="toggleCard(cardIndex); totalheight()" style="padding-top: 6px; padding-bottom: 6px;">
                     <md-card-avatar layout-align="center start ">
                         <i style="margin-top:10px"
                            ng-class="{ 'fa fa-times icon-status-failed': test.Errors > 0, 'fa fa-check icon-status-passed': test.Errors == 0,  }" aria-hidden="true">
@@ -152,7 +152,7 @@ mainTemplate = `<html lang="en">
                             <th class="test-code"><span>Exit code</span></th>
                         </tr>
                         </thead>
-                        <tbody  ng-repeat="dtest in test.Results"  ng-init="rowIndex=$index" ng-click="toggleRow(rowIndex,   cardIndex)" class="main-row">
+                        <tbody  ng-repeat="dtest in test.Results"  ng-init="rowIndex=$index" ng-click="toggleRow(rowIndex,   cardIndex); totalheight();" class="main-row">
                         <tr>
                             <td style="width:10px;">
                                 <i class="fa fa-caret-down" aria-hidden="true" ng-hide="showRow[rowIndex+''+cardIndex]"></i>
@@ -301,6 +301,14 @@ mainTemplate = `<html lang="en">
 		        i++;
 		    }, content);
 	        });
+
+			function findTotalheight() {
+				parent.postMessage(document.body.scrollHeight,"*");
+			}
+
+			$scope.totalheight = function() {
+				setTimeout(findTotalheight, 200)
+			}
 
 	        var pie = new d3pie("testTimes", {
 		    "header": {
