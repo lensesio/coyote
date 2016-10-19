@@ -86,7 +86,7 @@ mainTemplate = `<html lang="en">
         <div layout="row" flex layout-margin >
             <div flex="35" layout="column">
                 <div class="box">
-                    <h4> <b>{{ percentsucc }}%</b> Passed</h4>
+                    <h4> <b>{{ percentsucc | number:2 }}%</b> Passed</h4>
                     <h6 style="margin-top:-15px;"> Total tests: {{datalist.TotalTests}} </h6>
                 </div>
 
