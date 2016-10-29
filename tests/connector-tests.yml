@@ -60,7 +60,7 @@
       command:  curl -vs --stderr - -XDELETE "http://cloudera.landoop.com:8085/connectors/coyote-yahoo-finance-%UNIQUE_YF%"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - name: Delete Connect Distributes Test Topic (basic kafka)
-      command: kafka-topics --zookeeper cloudera.landoop.com:2181/confluent --topic coyote-yahoo-finance-%UNIQUE_YF% --delete
+      command: kafka-topics --zookeeper cloudera.landoop.com:2181/fastdata --topic coyote-yahoo-finance-%UNIQUE_YF% --delete
 
     - command: rm -rf coyote-yahoo-finance.properties.json
       nolog: true
