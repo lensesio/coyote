@@ -1,5 +1,5 @@
 - name: coyote
-  title: Confluent CSD SASL SSL Tests
+  title: Fast Data CSD SASL SSL Tests
 # Tests we should add:
 # - kafka-avro-console-consumer
 # - test hdfs-sink (difficult, test with kerberos in standalone)

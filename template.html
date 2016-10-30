@@ -186,7 +186,7 @@
                                     </code>
                                 </div>
 
-                                <h4 ng-show="dtest.Stderr != ''" >Error Log</h4>
+                                <h4 ng-show="dtest.Stderr != ''" >Standard Error</h4>
                                 <div style="cursor:text" ng-click="$event.stopPropagation();"  ng-show="dtest.Stderr != ''" class="td-hidden-error">
                                     <code>
 											<span ng-repeat="stderrline in dtest.Stderr track by $index" >
