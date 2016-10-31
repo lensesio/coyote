@@ -61,6 +61,11 @@ mainTemplate = `<html lang="en">
          md-card md-card-header md-card-avatar+md-card-header-text .md-title {font-size:18px;}
 		.md-headline { font-size: 18px}
 		.md-subhead {font-size: 14px;line-height: 24px;}
+		.testlist {overflow:auto;height:291px;background:#242424}
+		@media (max-width: 1553px) {
+		.testlist {height:327px;}
+
+		}
     </style>
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
@@ -90,7 +95,7 @@ mainTemplate = `<html lang="en">
                     <h6 style="margin-top:-15px;"> Total tests: {{datalist.TotalTests}} </h6>
                 </div>
 
-                <md-content style="overflow:auto;height:291px;background:#242424">
+                <md-content class="testlist">
                     <md-list class="md-dense box" flex >
 
 
