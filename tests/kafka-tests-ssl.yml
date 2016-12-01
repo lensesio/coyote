@@ -48,8 +48,6 @@
              --data '{"name": "a_consumer", "format": "avro", "auto.offset.reset": "smallest"}'
              "https://cloudera.landoop.com:8082/consumers/coyote_avro"
       stdout_not_has: [ 'error_code":[0-9]', 'Unexpected', 'HTTP/1.1 [45][0-9][0-9] ' ]
-    - command: sleep 20
-      nolog: true
     - name: Consume Avro Message (rest proxy, schema registry)
       command: |
         curl -vs --cert CERTFILE --key KEYFILE --stderr - -XGET -H "Accept: application/vnd.kafka.avro.v1+json"
@@ -73,8 +71,6 @@
               --data '{"name": "a_consumer", "format": "json", "auto.offset.reset": "smallest"}'
               "https://cloudera.landoop.com:8082/consumers/coyote_json"
       stdout_not_has: [ 'error_code":[0-9]', 'Unexpected', 'HTTP/1.1 [45][0-9][0-9] ' ]
-    - command: sleep 20
-      nolog: true
     - name: Consume JSON Message (rest proxy)
       command: |
         curl -vs --cert CERTFILE --key KEYFILE --stderr - -XGET -H "Accept: application/vnd.kafka.json.v1+json" \
@@ -98,8 +94,6 @@
               --data '{"name": "a_consumer", "format": "binary", "auto.offset.reset": "smallest"}'
               "https://cloudera.landoop.com:8082/consumers/coyote_binary"
       stdout_not_has: [ 'error_code":[0-9]', 'Unexpected', 'HTTP/1.1 [45][0-9][0-9] ' ]
-    - command: sleep 20
-      nolog: true
     - name: Consume Binary Message (rest proxy)
       command: |
         curl -vs --cert CERTFILE --key KEYFILE --stderr - -XGET -H "Accept: application/vnd.kafka.binary.v1+json" \
@@ -228,7 +222,7 @@
       command: tee coyote_connect_standalone.properties
       stdin: |
         bootstrap.servers=cloudera.landoop.com:9093
-        security.protocol=SASL_SSL
+        security.protocol=SSL
         key.converter=io.confluent.connect.avro.AvroConverter
         key.converter.schema.registry.url=https://cloudera.landoop.com:8081
         value.converter=io.confluent.connect.avro.AvroConverter
