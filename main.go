@@ -43,6 +43,7 @@ var (
 	defaultTimeout = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
 	title          = flag.String("title", "Coyote Tests", "title to use for report")
 	outputFile     = flag.String("out", "coyote.html", "filename to save the results under, if exists it will be overwritten")
+	outputJsonFile = flag.String("json-out", "", "filename to save the results JSON array under, if exitst it will be overwritten, if empty, will not be writter")
 	version        = flag.Bool("version", false, "print coyote version")
 	customTemplate = flag.String("template", "", "override internal golang template with this")
 )
@@ -297,6 +298,17 @@ func main() {
 			if err != nil {
 				logger.Println("Coyote error when creating json.")
 				os.Exit(255)
+			}
+
+			// Write json file if asked
+			if *outputJsonFile != "" {
+				fj, err := os.Create(*outputJsonFile)
+				defer fj.Close()
+				if err != nil {
+					logger.Println(err)
+				} else {
+					fj.Write(jsonData)
+				}
 			}
 
 			templateVars := struct {
