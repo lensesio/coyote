@@ -1,0 +1,39 @@
+- name: coyote
+  title: Test Skips
+
+- name: test group skip (skip)
+  skip: true
+  entries:
+    - command: echo "group skip, should not show"
+
+
+- name: test group skip (not skip)
+  skip: false
+  entries:
+    - command: echo "group skip, should show"
+
+- name: test group skip and noskip absence (not skip)
+  entries:
+    - command: echo "group skip/noskip, should show"
+
+- name: test group noskip (not skip)
+  noskip: true
+  entries:
+    - command: echo "group noskip, should show"
+
+- name: test group skip (skip)
+  noskip: _whatever_
+  entries:
+    - command: echo "group noskip, should not show"
+
+- name: test commands
+  entries:
+    - command: echo "command skip, should not show"
+      skip: true
+    - command: echo "command skip, should show"
+      skip: false
+    - command: echo "command skip/noskip absence, should show"
+    - command: echo "command noskip, should show"
+      noskip: true
+    - command: echo "command noskip, should not show"
+      noskip: false

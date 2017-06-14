@@ -1,4 +1,4 @@
-// Copyright 2016 Landoop LTD
+// Copyright 2016-2017 Landoop LTD
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,14 +31,16 @@ type Entry struct {
 	StderrNotExpect []string      `yaml:"stderr_not_has,omitempty"`
 	OnlyText        bool          `yaml:"only_text,omitempty"` // NI (Not Implemented)
 	IgnoreExitCode  bool          `yaml:"ignore_exit_code,omitempty"`
-	Skip            string        `yaml:"skip,omitempty"`
+	Skip            string        `yaml:"skip,omitempty"`   // Skips only if true
+	NoSkip          string        `yaml:"noskip,omitempty"` // Skips if it is set and not true
 }
 
 type EntryGroup struct {
 	Name    string  `yaml:"name"`
 	Entries []Entry `yaml:"entries"`
 	Title   string  `yaml:"title,omitempty"`
-	Skip    string  `yaml:"skip,omitempty"`
+	Skip    string  `yaml:"skip"`
+	NoSkip  string  `yaml:"noskip,omitempty"`
 	Type    string  `yaml:"type,omitempty"`
 }
 

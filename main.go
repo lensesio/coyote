@@ -1,4 +1,4 @@
-// Copyright 2016 Landoop LTD
+// Copyright 2016-2017 Landoop LTD
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -129,12 +129,21 @@ func main() {
 			logger.Printf("Skipping processing group: [ %s ]\n", v.Name)
 			continue
 		}
+		// Don't skip test if asked
+		if len(v.NoSkip) > 0 && strings.ToLower(v.NoSkip) != "true" {
+			logger.Printf("Skipping processing group: [ %s ]\n", v.Name)
+			continue
+		}
 
 		logger.Printf("Starting processing group: [ %s ]\n", v.Name)
 		// For entries in group
 		for _, v := range v.Entries {
 			// Skip command if asked
 			if strings.ToLower(v.Skip) == "true" {
+				continue
+			}
+			// Don't skip command if asked
+			if len(v.NoSkip) > 0 && strings.ToLower(v.NoSkip) != "true" {
 				continue
 			}
 
