@@ -29,7 +29,7 @@ To execute with a simple configuration file:
 
 The best example for understanding how to setup a coyote test, would be the
 [kafka-tests.yaml](https://github.com/Landoop/coyote/blob/master/tests/kafka-tests.yml)
-which we use to test our Confluent Platform setup for the
+which we use to test our Kafka setup for the
 [Landoop Boxes](https://docs.landoop.com/pages/your-box/).
 
 *Important:* coyote stores the stderr and stdout of each command in memory, so
