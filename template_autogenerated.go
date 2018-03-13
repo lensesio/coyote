@@ -1,16 +1,16 @@
 package main
 
 const (
-mainTemplate = `<html lang="en">
+	mainTemplate = `<html lang="en">
 <head>
     <meta charset="utf-8">
     <title>Coyote Tester | Results</title>
 
 
-    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
 
 
-    <script src="//use.fontawesome.com/fbbd91a770.js"></script>
+    <script src="http://use.fontawesome.com/fbbd91a770.js"></script>
 
     <style>
         body { background-color:#f4f4f4;}
@@ -68,8 +68,8 @@ mainTemplate = `<html lang="en">
 		}
     </style>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
-    <script src="//storage.googleapis.com/artifacts-landoop/d3pie.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
+    <script src="http://storage.googleapis.com/artifacts-landoop/d3pie.min.js"></script>
 </head>
 
 <body ng-app="CoyoteApp" ng-cloak>
@@ -233,19 +233,19 @@ mainTemplate = `<html lang="en">
 </div>
 
 
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
 
 
 
-<script src="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
-<script src="//storage.googleapis.com/wch/ansi_up-1.3.0.js" type="text/javascript"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+<script src="http://storage.googleapis.com/wch/ansi_up-1.3.0.js" type="text/javascript"></script>
 
 
-<script async defer src="//buttons.github.io/buttons.js"></script>
+<script async defer src="http://buttons.github.io/buttons.js"></script>
 
 
 <script type="text/javascript">
