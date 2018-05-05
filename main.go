@@ -39,13 +39,13 @@ import (
 //go:generate go run version-generate/main.go
 
 var (
-	configFile     = flag.String("c", "coyote.yml", "configuration file")
-	defaultTimeout = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
-	title          = flag.String("title", "Coyote Tests", "title to use for report")
-	outputFile     = flag.String("out", "coyote.html", "filename to save the results under, if exists it will be overwritten")
-	outputJsonFile = flag.String("json-out", "", "filename to save the results JSON array under, if exitst it will be overwritten, if empty, will not be writter")
-	version        = flag.Bool("version", false, "print coyote version")
-	customTemplate = flag.String("template", "", "override internal golang template with this")
+	configFilesArray configFilesArrayFlag // This is set via flag.Var, so look into the init() function
+	defaultTimeout   = flag.Duration("timeout", 5*time.Minute, "default timeout for commands (e.g 2h45m, 60s, 300ms)")
+	title            = flag.String("title", "Coyote Tests", "title to use for report")
+	outputFile       = flag.String("out", "coyote.html", "filename to save the results under, if exists it will be overwritten")
+	outputJsonFile   = flag.String("json-out", "", "filename to save the results JSON array under, if exitst it will be overwritten, if empty, will not be written")
+	version          = flag.Bool("version", false, "print coyote version")
+	customTemplate   = flag.String("template", "", "override internal golang template with this")
 )
 
 var (
@@ -55,9 +55,24 @@ var (
 	t           *template.Template
 )
 
+type configFilesArrayFlag []string
+
+func (i *configFilesArrayFlag) String() string {
+	return strings.Join(*i, ",")
+}
+func (i *configFilesArrayFlag) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
 func init() {
 	logger = log.New(os.Stderr, "", log.Ldate|log.Ltime)
+
+	flag.Var(&configFilesArray, "c", "configuration file(s), may be set more than once (default \"coyote.yml\")")
 	flag.Parse()
+	if len(configFilesArray) == 0 {
+		configFilesArray = append(configFilesArray, "coyote.yml")
+	}
 
 	if *defaultTimeout == 0 {
 		*defaultTimeout = time.Duration(365 * 24 * time.Hour)
@@ -86,11 +101,14 @@ func main() {
 	}
 
 	logger.Printf("Starting coyote-tester\n")
-
 	// Open yml configuration
-	configData, err := ioutil.ReadFile(*configFile)
-	if err != nil {
-		logger.Fatalln(err)
+	var configData []byte
+	for _, v := range configFilesArray {
+		data, err := ioutil.ReadFile(v)
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		configData = append(configData, data...)
 	}
 
 	var entriesGroups []EntryGroup
@@ -100,7 +118,7 @@ func main() {
 	var totalTime = 0.0
 
 	// Read yml configuration
-	err = yaml.Unmarshal(configData, &entriesGroups)
+	err := yaml.Unmarshal(configData, &entriesGroups)
 	if err != nil {
 		logger.Fatalf("Error reading configuration file: %v", err)
 	}
