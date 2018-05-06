@@ -1,17 +1,25 @@
 - name: coyote
   title: Sample YML
 
+- name: coyote
+  # global vars
+  vars:
+    TEST: echo
+
 - name: test
+  # local vars (have precedence)
+  vars:
+    TEST: ls
   entries:
     - name: ls command
       command: |
-        ls
+        %TEST%
         -lR
         .
     - name: echo command
       command: echo hello
     - name: error unless you are root
-      command: ls /root
+      command: "%TEST% /root"
 
 
 - name: moar tests
@@ -34,8 +42,8 @@
 
 - name: test env vars
   entries:
-    - name: echo a var
-      command: bash -c 'echo "$TEST"'
+    - name: "%TEST% a var"
+      command: bash -c '%TEST% "$TEST"'
       env: [ TEST="hello world" ]
 
 - name: test text search

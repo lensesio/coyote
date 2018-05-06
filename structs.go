@@ -1,4 +1,4 @@
-// Copyright 2016-2017 Landoop LTD
+// Copyright 2016-2018 Landoop LTD
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,12 +36,13 @@ type Entry struct {
 }
 
 type EntryGroup struct {
-	Name    string  `yaml:"name"`
-	Entries []Entry `yaml:"entries"`
-	Title   string  `yaml:"title,omitempty"`
-	Skip    string  `yaml:"skip"`
-	NoSkip  string  `yaml:"noskip,omitempty"`
-	Type    string  `yaml:"type,omitempty"`
+	Name    string            `yaml:"name"`
+	Entries []Entry           `yaml:"entries"`
+	Title   string            `yaml:"title,omitempty"`
+	Skip    string            `yaml:"skip"`
+	NoSkip  string            `yaml:"noskip,omitempty"`
+	Type    string            `yaml:"type,omitempty"`
+	Vars    map[string]string `yaml:"vars,omitempty"`
 }
 
 type Result struct {
