@@ -65,3 +65,13 @@ type ResultGroup struct {
 	Total     int
 	TotalTime float64
 }
+
+type ExportData struct {
+	Results    []ResultGroup
+	Errors     int
+	Successful int
+	TotalTests int
+	TotalTime  float64
+	Date       string
+	Title      string
+}
