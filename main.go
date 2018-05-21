@@ -29,6 +29,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -68,8 +69,29 @@ type configFilesArrayFlag []string
 func (i *configFilesArrayFlag) String() string {
 	return strings.Join(*i, ",")
 }
+
 func (i *configFilesArrayFlag) Set(value string) error {
-	*i = append(*i, value)
+	absPath, err := filepath.Abs(value)
+	if err != nil {
+		return err
+	}
+
+	if info, err := os.Stat(absPath); err == nil && info.IsDir() {
+		// act directory as a list of yaml files, if valid directory path passed.
+		if absPath[len(absPath)-1] != '/' {
+			absPath += "/"
+		}
+
+		files, err := filepath.Glob(absPath + "*.yml")
+		if err != nil {
+			return err
+		}
+
+		*i = append(*i, files...)
+		return nil
+	}
+
+	*i = append(*i, absPath)
 	return nil
 }
 
@@ -122,26 +144,61 @@ func main() {
 	}
 	logger.Printf("Starting coyote-tester\n")
 	// Open yml configuration
-	var configData []byte
-	for _, v := range configFilesArray {
+	var entriesGroups []EntryGroup
+
+	for idx, v := range configFilesArray {
 		data, err := ioutil.ReadFile(v)
 		if err != nil {
 			logger.Fatalln(err)
 		}
-		configData = append(configData, data...)
+
+		// Read yml configuration
+		var newEntriesGroups []EntryGroup
+		if err = yaml.Unmarshal(data, &newEntriesGroups); err != nil {
+			errMsg := fmt.Sprintf("Error reading configuration file(%s): %v", v, err)
+			if idx > 0 {
+				loadedSuc := append(configFilesArray[idx-1:idx], configFilesArray[idx+1:]...)
+				errMsg += fmt.Sprintf(".\nLoaded: %s", loadedSuc.String())
+			}
+
+			if len(configFilesArray) > idx+1 {
+				errMsg += fmt.Sprintf(", remained: %s", configFilesArray[idx+1:])
+			}
+
+			logger.Fatalln(errMsg)
+		}
+
+		for _, newGroup := range newEntriesGroups {
+			merged := false
+			for i, group := range entriesGroups {
+				if newGroup.Name == group.Name {
+					// join variables.
+					if group.Vars == nil {
+						group.Vars = newGroup.Vars
+					} else if newGroup.Vars != nil {
+						for varName, varValue := range newGroup.Vars {
+							group.Vars[varName] = varValue
+						}
+					}
+
+					// join entries.
+					group.Entries = append(group.Entries, newGroup.Entries...)
+					entriesGroups[i] = group
+					merged = true
+					break
+				}
+			}
+
+			if !merged {
+				entriesGroups = append(entriesGroups, newGroup)
+			}
+		}
 	}
 
-	var entriesGroups []EntryGroup
 	var resultsGroups []ResultGroup
 	var passed = 0
 	var errors = 0
 	var totalTime = 0.0
-
-	// Read yml configuration
-	err := yaml.Unmarshal(configData, &entriesGroups)
-	if err != nil {
-		logger.Fatalf("Error reading configuration file: %v", err)
-	}
 
 	// Search for Coyote Groups which Contain Global Configuration
 	for _, v := range entriesGroups {
@@ -340,24 +397,19 @@ func main() {
 		resultsGroups = append(resultsGroups, resultGroup)
 	}
 
+	data := ExportData{
+		resultsGroups,
+		errors,
+		passed,
+		errors + passed,
+		totalTime,
+		time.Now().UTC().Format("2006 Jan 02, Mon, 15:04 MST"),
+		*title,
+	}
+	err := writeResults(data)
 	if err != nil {
-		logger.Println(err)
-	} else {
-		data := ExportData{
-			resultsGroups,
-			errors,
-			passed,
-			errors + passed,
-			totalTime,
-			time.Now().UTC().Format("2006 Jan 02, Mon, 15:04 MST"),
-			*title,
-		}
-		err := writeResults(data)
-		if err != nil {
-			log.Println(err)
-			os.Exit(255)
-		}
-
+		log.Println(err)
+		os.Exit(255)
 	}
 
 	if errors == 0 {
