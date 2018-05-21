@@ -25,6 +25,7 @@ type Entry struct {
 	NoLog           bool          `yaml:"nolog,omitempty"`
 	EnvVars         []string      `yaml:"env,omitempty"`
 	Timeout         time.Duration `yaml:"timeout,omitempty"`
+	NoRegex         bool          `yaml:"noregex",omitempty` // disables regex matching for stdout_has, stdout_not_has, stderr_has and stderr_not_has (useful for matching [raw array results]).
 	StdoutExpect    []string      `yaml:"stdout_has,omitempty"`
 	StdoutNotExpect []string      `yaml:"stdout_not_has,omitempty"`
 	StderrExpect    []string      `yaml:"stderr_has,omitempty"`
