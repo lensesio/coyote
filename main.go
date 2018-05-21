@@ -440,8 +440,8 @@ func textEqual(value, against string, onlyText bool) (bool, error) {
 
 func textTest(t Entry, stdout, stderr string) error {
 	var (
-		pass bool
-		msg  string
+		pass = true
+		msg  = ""
 	)
 
 	for _, v := range t.StdoutExpect {
@@ -464,7 +464,7 @@ func textTest(t Entry, stdout, stderr string) error {
 			continue
 		}
 
-		pass, err := textEqual(v, stderr, t.OnlyText)
+		pass, err := textEqual(v, stdout, t.OnlyText)
 		if err != nil {
 			msg = fmt.Sprintf("%sStdout_not_has Bad Regexp: %v. \n", msg, err)
 		}
