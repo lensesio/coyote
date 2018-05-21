@@ -25,12 +25,11 @@ type Entry struct {
 	NoLog           bool          `yaml:"nolog,omitempty"`
 	EnvVars         []string      `yaml:"env,omitempty"`
 	Timeout         time.Duration `yaml:"timeout,omitempty"`
-	NoRegex         bool          `yaml:"noregex",omitempty` // disables regex matching for stdout_has, stdout_not_has, stderr_has and stderr_not_has (useful for matching [raw array results]).
 	StdoutExpect    []string      `yaml:"stdout_has,omitempty"`
 	StdoutNotExpect []string      `yaml:"stdout_not_has,omitempty"`
 	StderrExpect    []string      `yaml:"stderr_has,omitempty"`
 	StderrNotExpect []string      `yaml:"stderr_not_has,omitempty"`
-	OnlyText        bool          `yaml:"only_text,omitempty"` // NI (Not Implemented)
+	OnlyText        bool          `yaml:"only_text,omitempty"` // disables regex matching for stdout_has, stdout_not_has, stderr_has and stderr_not_has (useful for matching [raw array results]).
 	IgnoreExitCode  bool          `yaml:"ignore_exit_code,omitempty"`
 	Skip            string        `yaml:"skip,omitempty"`   // Skips only if true
 	NoSkip          string        `yaml:"noskip,omitempty"` // Skips if it is set and not true

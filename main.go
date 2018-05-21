@@ -427,8 +427,10 @@ func main() {
 
 func textEqual(value, against string, onlyText bool) (bool, error) {
 	if onlyText {
-		value = strings.Replace(value, "\n", "", -1)
-		against = strings.Replace(against, "\n", "", -1)
+		if strings.Contains(value, "\n") {
+			value = strings.Replace(value, "\n", "", -1)
+			against = strings.Replace(against, "\n", "", -1)
+		}
 
 		return value == against, nil
 	}
