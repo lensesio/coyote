@@ -273,6 +273,14 @@ func main() {
 			//   cmd := exec.Command("echo", args[0:]...)
 			// else
 			//   ...
+
+			if v.SleepBefore > 0 {
+				if !v.NoLog {
+					logger.Printf("Wait for %d seconds before run the test '%s'\n", int(v.SleepBefore.Seconds()), v.Name)
+				}
+				time.Sleep(v.SleepBefore)
+			}
+
 			var cmd *exec.Cmd
 			if len(args) == 0 { // Empty command?
 				logger.Printf("Entry %s is missing the command field. Aborting.\n", v.Name)
@@ -358,6 +366,13 @@ func main() {
 				t.Test = v
 				resultGroup.Results = append(resultGroup.Results, t)
 				resultGroup.TotalTime += t.Time
+			}
+
+			if v.SleepAfter > 0 {
+				if !v.NoLog {
+					logger.Printf("Wait for %d seconds after the test '%s' ran\n", int(v.SleepAfter.Seconds()), v.Name)
+				}
+				time.Sleep(v.SleepAfter)
 			}
 		}
 		resultGroup.Total = resultGroup.Passed + resultGroup.Errors

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -17,6 +18,13 @@ type (
 		NoLog   bool          `yaml:"nolog,omitempty"`
 		EnvVars []string      `yaml:"env,omitempty"`
 		Timeout time.Duration `yaml:"timeout,omitempty"`
+
+		// It differs from the `Timeout`,
+		// `SleepBefore` will wait for 'x' duration before the execution of this command.
+		SleepBefore time.Duration `yaml:"sleep_before,omitempty"`
+		// It differs from the `Timeout`,
+		// `SleepAfter` will wait for 'x' duration after the execution of this command.
+		SleepAfter time.Duration `yaml:"sleep_after,omitempty"`
 
 		// keep for backwards compability.
 		StdoutExpect    []string `yaml:"stdout_has,omitempty"`
@@ -126,7 +134,7 @@ func (f OutFilter) check(output string) (bool, error) {
 	}
 
 	if errMsg != "" {
-		return false, fmt.Errorf(errMsg)
+		return false, errors.New(errMsg)
 	}
 
 	return true, nil
@@ -200,7 +208,7 @@ func (e Entry) testBackwards(stdout, stderr string) (bool, error) {
 	}
 
 	if errMsg != "" {
-		return false, fmt.Errorf(errMsg)
+		return false, errors.New(errMsg)
 	}
 
 	return true, nil
