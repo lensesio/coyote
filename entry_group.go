@@ -91,7 +91,7 @@ func (l FileEntryLoader) Load(groups *[]EntryGroup) error {
 		if err = yaml.Unmarshal(data, &newGroups); err != nil {
 			errMsg := fmt.Sprintf("error reading configuration file(%s): %v", file, err)
 			if idx > 0 {
-				loadedSuc := append(l[idx-1:idx], l[idx+1:]...)
+				loadedSuc := l[0:idx]
 				errMsg += fmt.Sprintf(".\nLoaded: %s", strings.Join(loadedSuc, ", "))
 			}
 
