@@ -15,36 +15,6 @@
 
 package main
 
-import "time"
-
-type Entry struct {
-	Name            string        `yaml:"name"`
-	WorkDir         string        `yaml:"workdir"`
-	Command         string        `yaml:"command,omitempty"`
-	Stdin           string        `yaml:"stdin,omitempty"`
-	NoLog           bool          `yaml:"nolog,omitempty"`
-	EnvVars         []string      `yaml:"env,omitempty"`
-	Timeout         time.Duration `yaml:"timeout,omitempty"`
-	StdoutExpect    []string      `yaml:"stdout_has,omitempty"`
-	StdoutNotExpect []string      `yaml:"stdout_not_has,omitempty"`
-	StderrExpect    []string      `yaml:"stderr_has,omitempty"`
-	StderrNotExpect []string      `yaml:"stderr_not_has,omitempty"`
-	OnlyText        bool          `yaml:"only_text,omitempty"` // NI (Not Implemented)
-	IgnoreExitCode  bool          `yaml:"ignore_exit_code,omitempty"`
-	Skip            string        `yaml:"skip,omitempty"`   // Skips only if true
-	NoSkip          string        `yaml:"noskip,omitempty"` // Skips if it is set and not true
-}
-
-type EntryGroup struct {
-	Name    string            `yaml:"name"`
-	Entries []Entry           `yaml:"entries"`
-	Title   string            `yaml:"title,omitempty"`
-	Skip    string            `yaml:"skip"`
-	NoSkip  string            `yaml:"noskip,omitempty"`
-	Type    string            `yaml:"type,omitempty"`
-	Vars    map[string]string `yaml:"vars,omitempty"`
-}
-
 type Result struct {
 	Name    string
 	Command string
