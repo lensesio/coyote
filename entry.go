@@ -26,7 +26,7 @@ type (
 		// `SleepAfter` will wait for 'x' duration after the execution of this command.
 		SleepAfter time.Duration `yaml:"sleep_after,omitempty"`
 
-		// keep for backwards compability.
+		// keep for backwards compatibility.
 		StdoutExpect    []string `yaml:"stdout_has,omitempty"`
 		StdoutNotExpect []string `yaml:"stdout_not_has,omitempty"`
 		StderrExpect    []string `yaml:"stderr_has,omitempty"`

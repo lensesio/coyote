@@ -436,7 +436,7 @@ func assignMultiUseUniques(matches []string) {
 	}
 }
 
-// checkVarNames verifies that variable names are withing acceptable criteria
+// checkVarNames verifies that variable names are within acceptable criteria
 // and returns a new map where keys are enclosed within ampersands
 // so we can check for %VARNAME% entries.
 func checkVarNames(vars map[string]string) (map[string]string, error) {
