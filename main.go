@@ -36,7 +36,6 @@ import (
 	"time"
 
 	shellwords "github.com/mattn/go-shellwords"
-	"gopkg.in/yaml.v2"
 )
 
 //go:generate go run template-generate/include_templates.go
@@ -142,56 +141,22 @@ func main() {
 		}
 		os.Exit(0)
 	}
+
 	logger.Printf("Starting coyote-tester\n")
-	// Open yml configuration
+
+	// Set the available loaders to load EntryGroups from.
+	var loaders = []EntryLoader{
+		// from yaml file(s) configuration.
+		FileEntryLoader(configFilesArray),
+	}
+
+	// Load the set of `EntryGroup` based on the available `EntryLoader`s.
 	var entriesGroups []EntryGroup
 
-	for idx, v := range configFilesArray {
-		data, err := ioutil.ReadFile(v)
-		if err != nil {
-			logger.Fatalln(err)
-		}
-
-		// Read yml configuration
-		var newEntriesGroups []EntryGroup
-		if err = yaml.Unmarshal(data, &newEntriesGroups); err != nil {
-			errMsg := fmt.Sprintf("Error reading configuration file(%s): %v", v, err)
-			if idx > 0 {
-				loadedSuc := append(configFilesArray[idx-1:idx], configFilesArray[idx+1:]...)
-				errMsg += fmt.Sprintf(".\nLoaded: %s", loadedSuc.String())
-			}
-
-			if len(configFilesArray) > idx+1 {
-				errMsg += fmt.Sprintf(", remained: %s", configFilesArray[idx+1:])
-			}
-
-			logger.Fatalln(errMsg)
-		}
-
-		for _, newGroup := range newEntriesGroups {
-			merged := false
-			for i, group := range entriesGroups {
-				if newGroup.Name == group.Name {
-					// join variables.
-					if group.Vars == nil {
-						group.Vars = newGroup.Vars
-					} else if newGroup.Vars != nil {
-						for varName, varValue := range newGroup.Vars {
-							group.Vars[varName] = varValue
-						}
-					}
-
-					// join entries.
-					group.Entries = append(group.Entries, newGroup.Entries...)
-					entriesGroups[i] = group
-					merged = true
-					break
-				}
-			}
-
-			if !merged {
-				entriesGroups = append(entriesGroups, newGroup)
-			}
+	for _, loader := range loaders {
+		if err := loader.Load(&entriesGroups); err != nil {
+			// exit on first error.
+			logger.Fatal(err)
 		}
 	}
 
@@ -265,26 +230,6 @@ func main() {
 				continue
 			}
 
-			// If unique strings are asked, replace the placeholders
-			// Also replace local and global vars
-			v.Command = replaceUnique(v.Command)
-			v.Command = replaceVars(v.Command, localVars, globalVars)
-			v.Stdin = replaceUnique(v.Stdin)
-			v.Stdin = replaceVars(v.Stdin, localVars, globalVars)
-			v.Name = replaceVars(v.Name, localVars, globalVars)
-			var replaceInArrays = [][]string{
-				v.EnvVars,
-				v.StderrExpect,
-				v.StderrNotExpect,
-				v.StdoutExpect,
-				v.StdoutNotExpect,
-			}
-			for _, v2 := range replaceInArrays {
-				for k3, v3 := range v2 {
-					v2[k3] = replaceVars(replaceUnique(v3), localVars, globalVars)
-				}
-			}
-
 			// If timeout is missing, set the default. If it is <0, set infinite.
 			if v.Timeout == 0 {
 				v.Timeout = *defaultTimeout
@@ -292,6 +237,7 @@ func main() {
 				v.Timeout = time.Duration(365 * 24 * time.Hour)
 			}
 
+			v.MapVars(localVars, globalVars)
 			args, err := shellwords.Parse(v.Command)
 
 			if err != nil {
@@ -303,6 +249,14 @@ func main() {
 			//   cmd := exec.Command("echo", args[0:]...)
 			// else
 			//   ...
+
+			if v.SleepBefore > 0 {
+				if !v.NoLog {
+					logger.Printf("Wait for %d seconds before run the test '%s'\n", int(v.SleepBefore.Seconds()), v.Name)
+				}
+				time.Sleep(v.SleepBefore)
+			}
+
 			var cmd *exec.Cmd
 			if len(args) == 0 { // Empty command?
 				logger.Printf("Entry %s is missing the command field. Aborting.\n", v.Name)
@@ -341,7 +295,7 @@ func main() {
 			stderr := string(cmdErr.Bytes())
 
 			// Perform a textTest on outputs.
-			textErr := textTest(v, stdout, stderr)
+			_, textErr := v.Test(stdout, stderr)
 
 			if err != nil && timerLive && !v.IgnoreExitCode {
 				logger.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
@@ -389,6 +343,13 @@ func main() {
 				resultGroup.Results = append(resultGroup.Results, t)
 				resultGroup.TotalTime += t.Time
 			}
+
+			if v.SleepAfter > 0 {
+				if !v.NoLog {
+					logger.Printf("Wait for %d seconds after the test '%s' ran\n", int(v.SleepAfter.Seconds()), v.Name)
+				}
+				time.Sleep(v.SleepAfter)
+			}
 		}
 		resultGroup.Total = resultGroup.Passed + resultGroup.Errors
 		passed += resultGroup.Passed
@@ -406,8 +367,8 @@ func main() {
 		time.Now().UTC().Format("2006 Jan 02, Mon, 15:04 MST"),
 		*title,
 	}
-	err := writeResults(data)
-	if err != nil {
+
+	if err := writeResults(data); err != nil {
 		log.Println(err)
 		os.Exit(255)
 	}
@@ -423,64 +384,6 @@ func main() {
 		// If we had 254 or more errors, the error code is 254.
 		os.Exit(errors)
 	}
-}
-
-func textTest(t Entry, stdout, stderr string) error {
-	var pass = true
-	var msg = ""
-
-	for _, v := range t.StdoutExpect {
-		if len(v) > 0 {
-			matched, err := regexp.MatchString(v, stdout)
-			if err != nil {
-				pass = false
-				msg = fmt.Sprintf("%sStdout_has Bad Regexp. \n", msg)
-			} else if !matched {
-				pass = false
-				msg = fmt.Sprintf("%sStdout_has not matched expected '%s'.\n", msg, v)
-			}
-		}
-	}
-	for _, v := range t.StdoutNotExpect {
-		if len(v) > 0 {
-			matched, err := regexp.MatchString(v, stdout)
-			if err != nil {
-				pass = false
-				msg = fmt.Sprintf("%sStdout_not_has Bad Regexp.\n", msg)
-			} else if matched {
-				pass = false
-				msg = fmt.Sprintf("%sStdout_not_has matched not expected '%s'.\n", msg, v)
-			}
-		}
-	}
-	for _, v := range t.StderrExpect {
-		if len(v) > 0 {
-			matched, err := regexp.MatchString(v, stderr)
-			if err != nil {
-				pass = false
-				msg = fmt.Sprintf("%sStderr_has Bad Regexp.\n", msg)
-			} else if !matched {
-				pass = false
-				msg = fmt.Sprintf("%sStderr_has not matched expected '%s'.\n", msg, v)
-			}
-		}
-	}
-	for _, v := range t.StderrNotExpect {
-		if len(v) > 0 {
-			matched, err := regexp.MatchString(v, stderr)
-			if err != nil {
-				pass = false
-				msg = fmt.Sprintf("%sStderr_not_has Bad Regexp.\n", msg)
-			} else if matched {
-				pass = false
-				msg = fmt.Sprintf("%sStderr_not_has matched not expected '%s'.\n", msg, v)
-			}
-		}
-	}
-	if !pass {
-		return errors.New(msg)
-	}
-	return nil
 }
 
 // recurseClean cleans a []string from one or more empty entries at the start of the array.
@@ -533,7 +436,7 @@ func assignMultiUseUniques(matches []string) {
 	}
 }
 
-// checkVarNames verifies that variable names are withing acceptable criteria
+// checkVarNames verifies that variable names are within acceptable criteria
 // and returns a new map where keys are enclosed within ampersands
 // so we can check for %VARNAME% entries.
 func checkVarNames(vars map[string]string) (map[string]string, error) {
