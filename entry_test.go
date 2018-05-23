@@ -21,7 +21,7 @@ func TestOutFilterNoRegex(t *testing.T) {
 		if ok {
 			t.Fatalf("expected to not be passed if error")
 		}
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if !ok && err == nil {

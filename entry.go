@@ -73,13 +73,15 @@ func (filters OutFilters) GetNotMatches() (notMatches []string) {
 	return
 }
 
+func removeNewLine(s string) string {
+	return strings.TrimRightFunc(s, func(c rune) bool {
+		return c == '\r' || c == '\n'
+	})
+}
+
 func canPassAgainst(against, output string, noregex bool) (bool, error) {
 	if noregex {
-		if strings.Contains(output, "\n") {
-			output = strings.Replace(output, "\n", "", -1)
-			against = strings.Replace(against, "\n", "", -1)
-		}
-
+		against, output = removeNewLine(against), removeNewLine(output)
 		return output == against, nil
 	}
 
