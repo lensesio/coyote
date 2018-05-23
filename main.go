@@ -36,7 +36,6 @@ import (
 	"time"
 
 	shellwords "github.com/mattn/go-shellwords"
-	"gopkg.in/yaml.v2"
 )
 
 //go:generate go run template-generate/include_templates.go
@@ -142,56 +141,22 @@ func main() {
 		}
 		os.Exit(0)
 	}
+
 	logger.Printf("Starting coyote-tester\n")
-	// Open yml configuration
+
+	// Set the available loaders to load EntryGroups from.
+	var loaders = []EntryLoader{
+		// from yaml file(s) configuration.
+		FileEntryLoader(configFilesArray),
+	}
+
+	// Load the set of `EntryGroup` based on the available `EntryLoader`s.
 	var entriesGroups []EntryGroup
 
-	for idx, v := range configFilesArray {
-		data, err := ioutil.ReadFile(v)
-		if err != nil {
-			logger.Fatalln(err)
-		}
-
-		// Read yml configuration
-		var newEntriesGroups []EntryGroup
-		if err = yaml.Unmarshal(data, &newEntriesGroups); err != nil {
-			errMsg := fmt.Sprintf("Error reading configuration file(%s): %v", v, err)
-			if idx > 0 {
-				loadedSuc := append(configFilesArray[idx-1:idx], configFilesArray[idx+1:]...)
-				errMsg += fmt.Sprintf(".\nLoaded: %s", loadedSuc.String())
-			}
-
-			if len(configFilesArray) > idx+1 {
-				errMsg += fmt.Sprintf(", remained: %s", configFilesArray[idx+1:])
-			}
-
-			logger.Fatalln(errMsg)
-		}
-
-		for _, newGroup := range newEntriesGroups {
-			merged := false
-			for i, group := range entriesGroups {
-				if newGroup.Name == group.Name {
-					// join variables.
-					if group.Vars == nil {
-						group.Vars = newGroup.Vars
-					} else if newGroup.Vars != nil {
-						for varName, varValue := range newGroup.Vars {
-							group.Vars[varName] = varValue
-						}
-					}
-
-					// join entries.
-					group.Entries = append(group.Entries, newGroup.Entries...)
-					entriesGroups[i] = group
-					merged = true
-					break
-				}
-			}
-
-			if !merged {
-				entriesGroups = append(entriesGroups, newGroup)
-			}
+	for _, loader := range loaders {
+		if err := loader.Load(&entriesGroups); err != nil {
+			// exit on first error.
+			logger.Fatal(err)
 		}
 	}
 
@@ -341,7 +306,7 @@ func main() {
 			stderr := string(cmdErr.Bytes())
 
 			// Perform a textTest on outputs.
-			textErr := textTest(v, stdout, stderr)
+			_, textErr := v.Test(stdout, stderr)
 
 			if err != nil && timerLive && !v.IgnoreExitCode {
 				logger.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
@@ -406,8 +371,8 @@ func main() {
 		time.Now().UTC().Format("2006 Jan 02, Mon, 15:04 MST"),
 		*title,
 	}
-	err := writeResults(data)
-	if err != nil {
+
+	if err := writeResults(data); err != nil {
 		log.Println(err)
 		os.Exit(255)
 	}
@@ -423,96 +388,6 @@ func main() {
 		// If we had 254 or more errors, the error code is 254.
 		os.Exit(errors)
 	}
-}
-
-func textEqual(value, against string, onlyText bool) (bool, error) {
-	if onlyText {
-		if strings.Contains(value, "\n") {
-			value = strings.Replace(value, "\n", "", -1)
-			against = strings.Replace(against, "\n", "", -1)
-		}
-
-		return value == against, nil
-	}
-
-	return regexp.MatchString(value, against)
-}
-
-func textTest(t Entry, stdout, stderr string) error {
-	var (
-		pass = true
-		msg  = ""
-	)
-
-	for _, v := range t.StdoutExpect {
-		if v == "" {
-			continue
-		}
-
-		pass, err := textEqual(v, stdout, t.OnlyText)
-		if err != nil {
-			msg = fmt.Sprintf("%sStdout_has Bad Regexp: %v. \n", msg, err)
-		}
-
-		if !pass {
-			msg = fmt.Sprintf("%sStdout_has not matched expected '%s'.\n", msg, v)
-		}
-	}
-
-	for _, v := range t.StdoutNotExpect {
-		if v == "" {
-			continue
-		}
-
-		pass, err := textEqual(v, stdout, t.OnlyText)
-		if err != nil {
-			msg = fmt.Sprintf("%sStdout_not_has Bad Regexp: %v. \n", msg, err)
-		}
-
-		if pass {
-			msg = fmt.Sprintf("%sStdout_not_has not matched expected '%s'.\n", msg, v)
-		} else if err == nil {
-			pass = true // pass the test.
-		}
-	}
-
-	for _, v := range t.StderrExpect {
-		if v == "" {
-			continue
-		}
-
-		pass, err := textEqual(v, stderr, t.OnlyText)
-		if err != nil {
-			msg = fmt.Sprintf("%sStderr_has Bad Regexp: %v. \n", msg, err)
-		}
-
-		if !pass {
-			msg = fmt.Sprintf("%sStderr_has not matched expected '%s'.\n", msg, v)
-		}
-	}
-
-	for _, v := range t.StderrNotExpect {
-		if v == "" {
-			continue
-		}
-
-		pass, err := textEqual(v, stderr, t.OnlyText)
-		if err != nil {
-			msg = fmt.Sprintf("%sStderr_has Bad Regexp: %v. \n", msg, err)
-		}
-
-		if pass {
-			msg = fmt.Sprintf("%sStderr_has not matched expected '%s'.\n", msg, v)
-		} else if err == nil {
-			pass = true // pass the test.
-		}
-	}
-
-	if !pass {
-		return errors.New(msg)
-	}
-
-	return nil
 }
 
 // recurseClean cleans a []string from one or more empty entries at the start of the array.
