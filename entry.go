@@ -73,7 +73,7 @@ func (filters OutFilters) GetNotMatches() (notMatches []string) {
 	return
 }
 
-func canPassAgainst(output, against string, noregex bool) (bool, error) {
+func canPassAgainst(against, output string, noregex bool) (bool, error) {
 	if noregex {
 		if strings.Contains(output, "\n") {
 			output = strings.Replace(output, "\n", "", -1)
@@ -83,7 +83,7 @@ func canPassAgainst(output, against string, noregex bool) (bool, error) {
 		return output == against, nil
 	}
 
-	return regexp.MatchString(output, against)
+	return regexp.MatchString(against, output)
 }
 
 func (f OutFilter) check(output string) (bool, error) {
