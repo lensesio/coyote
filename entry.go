@@ -40,9 +40,9 @@ type (
 	// See `Entry` for more.
 	OutFilter struct {
 		// Match should match (against regex expression if NoRegex is false, default behavior).
-		Match string `yaml:"match,omitempty"`
+		Match []string `yaml:"match,omitempty"`
 		// NotMatch should not match (against regex expression if NoRegex is false, default behavior).
-		NotMatch string `yaml:"not_match,omitempty"`
+		NotMatch []string `yaml:"not_match,omitempty"`
 
 		/* More options below... */
 
@@ -68,7 +68,11 @@ func canPassAgainst(output, against string, noregex bool) (bool, error) {
 func (f OutFilter) check(output string) (bool, error) {
 	var errMsg string
 
-	if v := f.Match; v != "" {
+	for _, v := range f.Match {
+		if v == "" {
+			continue
+		}
+
 		// check for match.
 		pass, errPass := canPassAgainst(v, output, f.NoRegex)
 		if errPass != nil {
@@ -80,7 +84,11 @@ func (f OutFilter) check(output string) (bool, error) {
 		}
 	}
 
-	if v := f.NotMatch; v != "" {
+	for _, v := range f.NotMatch {
+		if v == "" {
+			continue
+		}
+
 		// check for not match (too).
 		pass, errPass := canPassAgainst(v, output, f.NoRegex)
 		if errPass != nil {
@@ -111,7 +119,7 @@ func (e Entry) testBackwards(stdout, stderr string) (bool, error) {
 
 		pass, errPass := canPassAgainst(v, stdout, e.NoRegex)
 		if errPass != nil {
-			errMsg = fmt.Sprintf("Stdout_has Bad Regexp: %v. \n", errMsg, errPass)
+			errMsg = fmt.Sprintf("Stdout_has Bad Regexp: %v. \n", errPass)
 		}
 
 		if !pass {
