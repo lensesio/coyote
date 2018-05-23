@@ -230,31 +230,6 @@ func main() {
 				continue
 			}
 
-			// If unique strings are asked, replace the placeholders
-			// Also replace local and global vars
-			v.Command = replaceUnique(v.Command)
-			v.Command = replaceVars(v.Command, localVars, globalVars)
-			v.Stdin = replaceUnique(v.Stdin)
-			v.Stdin = replaceVars(v.Stdin, localVars, globalVars)
-			v.Name = replaceVars(v.Name, localVars, globalVars)
-			var replaceInArrays = [][]string{
-				v.EnvVars,
-				v.StderrExpect,
-				v.StderrNotExpect,
-				v.StdoutExpect,
-				v.StdoutNotExpect,
-				v.Stderr.GetMatches(),
-				v.Stderr.GetNotMatches(),
-				v.Stdout.GetMatches(),
-				v.Stdout.GetNotMatches(),
-			}
-
-			for _, v2 := range replaceInArrays {
-				for k3, v3 := range v2 {
-					v2[k3] = replaceVars(replaceUnique(v3), localVars, globalVars)
-				}
-			}
-
 			// If timeout is missing, set the default. If it is <0, set infinite.
 			if v.Timeout == 0 {
 				v.Timeout = *defaultTimeout
@@ -262,6 +237,7 @@ func main() {
 				v.Timeout = time.Duration(365 * 24 * time.Hour)
 			}
 
+			v.MapVars(localVars, globalVars)
 			args, err := shellwords.Parse(v.Command)
 
 			if err != nil {

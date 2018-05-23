@@ -140,7 +140,7 @@ func (f OutFilter) check(output string) (bool, error) {
 	return true, nil
 }
 
-func (e Entry) testBackwards(stdout, stderr string) (bool, error) {
+func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 	var errMsg string
 
 	for _, v := range e.StdoutExpect {
@@ -214,10 +214,48 @@ func (e Entry) testBackwards(stdout, stderr string) (bool, error) {
 	return true, nil
 }
 
+func mapVars(localVars, globalVars map[string]string, lists ...*[]string) {
+	for _, items := range lists {
+		tmp := *items
+		for i, item := range tmp {
+			result := replaceVars(replaceUnique(item), localVars, globalVars)
+			tmp[i] = result
+		}
+
+		*items = tmp
+	}
+}
+
+// MapVars maps the local and global vars to the name, command, stdin, env_vars and (not) expected stdout and stderr.
+func (e *Entry) MapVars(localVars, globalVars map[string]string) { // note that local vars have priority over global vars.
+	// If unique strings are asked, replace the placeholders
+	// Also replace local and global vars.
+	e.Name = replaceVars(e.Name, localVars, globalVars)
+	e.Command = replaceVars(replaceUnique(e.Command), localVars, globalVars)
+	e.Stdin = replaceVars(replaceUnique(e.Stdin), localVars, globalVars)
+	mapVars(localVars, globalVars, &e.EnvVars)
+
+	shouldFirstCheckForOld := len(e.StderrExpect) > 0 || len(e.StderrNotExpect) > 0
+	if shouldFirstCheckForOld {
+		mapVars(localVars, globalVars, &e.StdoutExpect, &e.StdoutNotExpect, &e.StderrExpect, &e.StderrNotExpect)
+	}
+
+	for _, filter := range e.Stdout {
+		mapVars(localVars, globalVars, &filter.Match, &filter.NotMatch)
+	}
+
+	for _, filter := range e.Stderr {
+		mapVars(localVars, globalVars, &filter.Match, &filter.NotMatch)
+	}
+
+}
+
 // Test runs the tests based on the entry's fields and returns false if failed.
 // The error is empty if test passed, otherwise it contains the necessary information text that
 // the caller should know about the reason of failure of the particular test.
-func (e Entry) Test(stdout, stderr string) (bool, error) {
+//
+// Call of `MapVars` is required if local or/and global variables declared.
+func (e *Entry) Test(stdout, stderr string) (bool, error) {
 	// here we can mix the old and new syntax,
 	// first check if with the old syntax passed, if passed and has new syntax is there, check that as well, otherwise fail.
 	shouldFirstCheckForOld := len(e.StderrExpect) > 0 || len(e.StderrNotExpect) > 0
