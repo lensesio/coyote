@@ -27,8 +27,8 @@ type (
 		// Useful for matching [raw array results]).
 		NoRegex bool `yaml:"noregex,omitempty"`
 
-		Stdout []OutFilter `yaml:"stdout,omitempty"`
-		Stderr []OutFilter `yaml:"stderr,omitempty"`
+		Stdout OutFilters `yaml:"stdout,omitempty"`
+		Stderr OutFilters `yaml:"stderr,omitempty"`
 
 		IgnoreExitCode bool   `yaml:"ignore_exit_code,omitempty"`
 		Skip           string `yaml:"skip,omitempty"`   // Skips only if true
@@ -50,7 +50,28 @@ type (
 		// Useful for matching [raw array results]).
 		NoRegex bool `yaml:"noregex,omitempty"`
 	}
+
+	// OutFilters is a set of `OutFilter`.
+	OutFilters []OutFilter
 )
+
+// GetMatches simply returns the text of all `Match` inside "filters".
+func (filters OutFilters) GetMatches() (matches []string) {
+	for _, filter := range filters {
+		matches = append(matches, filter.Match...)
+	}
+
+	return
+}
+
+// GetNotMatches simply returns the text of all `NotMatch` inside "filters".
+func (filters OutFilters) GetNotMatches() (notMatches []string) {
+	for _, filter := range filters {
+		notMatches = append(notMatches, filter.NotMatch...)
+	}
+
+	return
+}
 
 func canPassAgainst(output, against string, noregex bool) (bool, error) {
 	if noregex {

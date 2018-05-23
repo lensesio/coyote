@@ -243,16 +243,10 @@ func main() {
 				v.StderrNotExpect,
 				v.StdoutExpect,
 				v.StdoutNotExpect,
-			}
-
-			for _, filter := range v.Stdout {
-				replaceInArrays[0] = append(replaceInArrays[0], filter.Match...)
-				replaceInArrays[0] = append(replaceInArrays[0], filter.NotMatch...)
-			}
-
-			for _, filter := range v.Stderr {
-				replaceInArrays[0] = append(replaceInArrays[0], filter.Match...)
-				replaceInArrays[0] = append(replaceInArrays[0], filter.NotMatch...)
+				v.Stderr.GetMatches(),
+				v.Stderr.GetNotMatches(),
+				v.Stdout.GetMatches(),
+				v.Stdout.GetNotMatches(),
 			}
 
 			for _, v2 := range replaceInArrays {
