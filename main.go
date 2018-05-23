@@ -244,6 +244,17 @@ func main() {
 				v.StdoutExpect,
 				v.StdoutNotExpect,
 			}
+
+			for _, filter := range v.Stdout {
+				replaceInArrays[0] = append(replaceInArrays[0], filter.Match...)
+				replaceInArrays[0] = append(replaceInArrays[0], filter.NotMatch...)
+			}
+
+			for _, filter := range v.Stderr {
+				replaceInArrays[0] = append(replaceInArrays[0], filter.Match...)
+				replaceInArrays[0] = append(replaceInArrays[0], filter.NotMatch...)
+			}
+
 			for _, v2 := range replaceInArrays {
 				for k3, v3 := range v2 {
 					v2[k3] = replaceVars(replaceUnique(v3), localVars, globalVars)
