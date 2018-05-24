@@ -116,29 +116,54 @@ func canPassAgainst(against, output string, f OutFilter) (bool, error) {
 	return regexp.MatchString(against, output)
 }
 
-func (f OutFilter) check(output string) (bool, error) {
-	var errMsg string
+// key -> the position of the test case for both stdout and stderr.
+// value -> the error(s) produced by each of them.
+type filterErrors map[int][]string
 
-	for _, v := range f.Match {
+var newLineB = []byte("\n")
+
+func (errs filterErrors) String() string {
+	b := new(strings.Builder)
+	if len(errs) == 0 {
+		return ""
+	}
+
+	for _, errors := range errs {
+		for _, errMsg := range errors {
+			if errMsg != "" {
+				b.WriteString(errMsg)
+				b.Write(newLineB)
+			}
+		}
+	}
+
+	return b.String()
+}
+
+func (f OutFilter) check(output string) (bool, error) {
+	matchErrors, notMatchErrors := make(filterErrors), make(filterErrors)
+
+	for i, v := range f.Match {
 		if v == "" {
 			continue
 		}
 
 		// check for match.
 		pass, errPass := canPassAgainst(v, output, f)
+
 		if errPass != nil {
-			errMsg = fmt.Sprintf("match: bad regexp: %v. \n", errPass)
+			matchErrors[i] = append(matchErrors[i], fmt.Sprintf("match: bad regexp: %v.", errPass))
 		}
 
 		if !pass {
-			errMsg = fmt.Sprintf("%smatch: should expected '%s'.\n", errMsg, v)
-		} else if f.Contains { // we found at least one not expected, stop searchinf for more now.
-			errMsg = ""
+			matchErrors[i] = append(matchErrors[i], fmt.Sprintf("match: should expected '%s'.", v))
+		} else if f.Contains { // we passed at least one case, break and delete any previous errors for THIS `match` entry.
+			matchErrors[i] = []string{}
 			break
 		}
 	}
 
-	for _, v := range f.NotMatch {
+	for i, v := range f.NotMatch {
 		if v == "" {
 			continue
 		}
@@ -146,21 +171,21 @@ func (f OutFilter) check(output string) (bool, error) {
 		// check for not match (too).
 		pass, errPass := canPassAgainst(v, output, f)
 		if errPass != nil {
-			errMsg = fmt.Sprintf("%snot_match: bad regexp: %v. \n", errMsg, errPass)
+			notMatchErrors[i] = append(notMatchErrors[i], fmt.Sprintf("not_match: bad regexp: %v.", errPass))
 		}
 
 		if pass {
-			errMsg = fmt.Sprintf("%snot_match: should not expected '%s'.\n", errMsg, v)
+			notMatchErrors[i] = append(notMatchErrors[i], fmt.Sprintf("not_match: should not expected '%s'.", v))
 		} else if errPass == nil {
 			pass = true     // we can ignore it because we only check for errMsg != "", it's here for readability.
-			if f.Contains { // we found at least one not expected, stop searchinf for more now.
-				errMsg = ""
+			if f.Contains { // we passed at least one case, break and delete any previous errors for THIS `not_match` entry.
+				notMatchErrors[i] = []string{}
 				break
 			}
 		}
 	}
 
-	if errMsg != "" {
+	if errMsg := matchErrors.String() + notMatchErrors.String(); errMsg != "" {
 		return false, errors.New(errMsg)
 	}
 
