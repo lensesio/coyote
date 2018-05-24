@@ -157,8 +157,11 @@ func (f OutFilter) check(output string) (bool, error) {
 
 		if !pass {
 			matchErrors[i] = append(matchErrors[i], fmt.Sprintf("match: should expected '%s'.", v))
-		} else if f.Contains { // we passed at least one case, break and delete any previous errors for THIS `match` entry.
-			matchErrors[i] = []string{}
+		} else if f.Contains { // we passed at least one case, break.
+			// and delete any previous errors for THIS `match` entry.
+			for j := 0; j < i; j++ {
+				delete(matchErrors, j)
+			}
 			break
 		}
 	}
@@ -178,8 +181,11 @@ func (f OutFilter) check(output string) (bool, error) {
 			notMatchErrors[i] = append(notMatchErrors[i], fmt.Sprintf("not_match: should not expected '%s'.", v))
 		} else if errPass == nil {
 			pass = true     // we can ignore it because we only check for errMsg != "", it's here for readability.
-			if f.Contains { // we passed at least one case, break and delete any previous errors for THIS `not_match` entry.
-				notMatchErrors[i] = []string{}
+			if f.Contains { // we passed at least one case, break.
+				// and delete any previous errors for THIS `match` entry.
+				for j := 0; j < i; j++ {
+					delete(notMatchErrors, j)
+				}
 				break
 			}
 		}

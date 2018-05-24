@@ -29,6 +29,7 @@ func TestOutFilterNoRegex(t *testing.T) {
 	}
 }
 
+// TODO: cleanup this test.
 func TestOutFilterContains(t *testing.T) {
 	has := `logs-broker\nnullsink\n`
 	expectingOneOfThem := []string{"nullsink", "or that"}
@@ -68,7 +69,24 @@ func TestOutFilterContains(t *testing.T) {
 	}
 
 	if _, err := entry2.Test(has, ""); err == nil {
-		t.Fatalf("expected to not be passed")
+		t.Fatalf("[entry2] expected to not be passed")
+	}
+
+	entry3 := Entry{
+		Stdout: OutFilters{
+			OutFilter{
+				// test reverse, first element does not exists but second does, it should pass.
+				Match:    append([]string{}, expectingOneOfThem[1], expectingOneOfThem[0]),
+				Contains: true,
+			},
+		},
+	}
+
+	if ok, err = entry3.Test(has, ""); err != nil {
+		if ok {
+			t.Fatalf("[entry3] expected to not be passed if error")
+		}
+		t.Fatal(err)
 	}
 
 }
