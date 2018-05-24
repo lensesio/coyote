@@ -31,7 +31,7 @@ func TestOutFilterNoRegex(t *testing.T) {
 
 func TestOutFilterContains(t *testing.T) {
 	has := `logs-broker\nnullsink\n`
-	expectingOneOfThem := []string{"nullsink"}
+	expectingOneOfThem := []string{"nullsink", "or that"}
 
 	entry := Entry{
 		Stdout: OutFilters{
@@ -58,7 +58,7 @@ func TestOutFilterContains(t *testing.T) {
 	entry2 := Entry{
 		Stdout: OutFilters{
 			OutFilter{
-				Match:    expectingOneOfThem,
+				Match:    append([]string{}, expectingOneOfThem[0]), // test single entry too.
 				Contains: true,
 			},
 			OutFilter{
