@@ -57,6 +57,10 @@ type (
 		// NoRegex if true disables the regex matching, which is the default behavior.
 		// Useful for matching [raw array results]).
 		NoRegex bool `yaml:"noregex,omitempty"`
+		// Contains if true then it passes the test if at least one of the Match/NotMatch entries and their content
+		// exist in the command's output.
+		// Essentialy is a small helper, it can be done with regex as well.
+		Contains bool `yaml:"contains,omitempty"`
 	}
 
 	// OutFilters is a set of `OutFilter`.
@@ -87,10 +91,26 @@ func removeNewLine(s string) string {
 	})
 }
 
-func canPassAgainst(against, output string, noregex bool) (bool, error) {
+func canPassAgainstBackwards(against, output string, noregex bool) (bool, error) {
 	if noregex {
 		against, output = removeNewLine(against), removeNewLine(output)
 		return output == against, nil
+	}
+
+	return regexp.MatchString(against, output)
+}
+
+func canPassAgainst(against, output string, f OutFilter) (bool, error) {
+	if f.NoRegex {
+		against, output = removeNewLine(against), removeNewLine(output)
+		if f.Contains {
+			return strings.Contains(output, against), nil
+		}
+		return output == against, nil
+	}
+
+	if f.Contains {
+		return strings.Contains(output, against), nil
 	}
 
 	return regexp.MatchString(against, output)
@@ -105,13 +125,15 @@ func (f OutFilter) check(output string) (bool, error) {
 		}
 
 		// check for match.
-		pass, errPass := canPassAgainst(v, output, f.NoRegex)
+		pass, errPass := canPassAgainst(v, output, f)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("match: bad regexp: %v. \n", errPass)
 		}
 
 		if !pass {
 			errMsg = fmt.Sprintf("%smatch: should expected '%s'.\n", errMsg, v)
+		} else if f.Contains { // we found at least one not expected, stop searchinf for more now.
+			break
 		}
 	}
 
@@ -121,7 +143,7 @@ func (f OutFilter) check(output string) (bool, error) {
 		}
 
 		// check for not match (too).
-		pass, errPass := canPassAgainst(v, output, f.NoRegex)
+		pass, errPass := canPassAgainst(v, output, f)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("%snot_match: bad regexp: %v. \n", errMsg, errPass)
 		}
@@ -129,7 +151,10 @@ func (f OutFilter) check(output string) (bool, error) {
 		if pass {
 			errMsg = fmt.Sprintf("%snot_match: should not expected '%s'.\n", errMsg, v)
 		} else if errPass == nil {
-			pass = true // we can ignore it because we only check for errMsg != "", it's here for readability.
+			pass = true     // we can ignore it because we only check for errMsg != "", it's here for readability.
+			if f.Contains { // we found at least one not expected, stop searchinf for more now.
+				break
+			}
 		}
 	}
 
@@ -148,7 +173,7 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 			continue
 		}
 
-		pass, errPass := canPassAgainst(v, stdout, e.NoRegex)
+		pass, errPass := canPassAgainstBackwards(v, stdout, e.NoRegex)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("Stdout_has Bad Regexp: %v. \n", errPass)
 		}
@@ -163,7 +188,7 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 			continue
 		}
 
-		pass, errPass := canPassAgainst(v, stdout, e.NoRegex)
+		pass, errPass := canPassAgainstBackwards(v, stdout, e.NoRegex)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("%sStdout_not_has Bad Regexp: %v. \n", errMsg, errPass)
 		}
@@ -180,7 +205,7 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 			continue
 		}
 
-		pass, errPass := canPassAgainst(v, stderr, e.NoRegex)
+		pass, errPass := canPassAgainstBackwards(v, stderr, e.NoRegex)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("%sStderr_has Bad Regexp: %v. \n", errMsg, errPass)
 		}
@@ -195,7 +220,7 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 			continue
 		}
 
-		pass, errPass := canPassAgainst(v, stderr, e.NoRegex)
+		pass, errPass := canPassAgainstBackwards(v, stderr, e.NoRegex)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("%sStderr_has Bad Regexp: %v. \n", errMsg, errPass)
 		}
