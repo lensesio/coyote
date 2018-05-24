@@ -133,6 +133,7 @@ func (f OutFilter) check(output string) (bool, error) {
 		if !pass {
 			errMsg = fmt.Sprintf("%smatch: should expected '%s'.\n", errMsg, v)
 		} else if f.Contains { // we found at least one not expected, stop searchinf for more now.
+			errMsg = ""
 			break
 		}
 	}
@@ -153,6 +154,7 @@ func (f OutFilter) check(output string) (bool, error) {
 		} else if errPass == nil {
 			pass = true     // we can ignore it because we only check for errMsg != "", it's here for readability.
 			if f.Contains { // we found at least one not expected, stop searchinf for more now.
+				errMsg = ""
 				break
 			}
 		}
