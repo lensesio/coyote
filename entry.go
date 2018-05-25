@@ -156,7 +156,7 @@ func (f OutFilter) check(output string) (bool, error) {
 		}
 
 		if !pass {
-			matchErrors[i] = append(matchErrors[i], fmt.Sprintf("match: should expected '%s'.", v))
+			matchErrors[i] = append(matchErrors[i], fmt.Sprintf("match: should expected '%s' but got '%s'.", v, output))
 		} else if f.Contains { // we passed at least one case, break.
 			// and delete any previous errors for THIS `match` entry.
 			for j := 0; j < i; j++ {
