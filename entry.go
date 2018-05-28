@@ -57,10 +57,10 @@ type (
 		// NoRegex if true disables the regex matching, which is the default behavior.
 		// Useful for matching [raw array results]).
 		NoRegex bool `yaml:"noregex,omitempty"`
-		// Contains if true then it passes the test if at least one of the Match/NotMatch entries and their content
+		// Partial if true then it passes the test if at least one of the Match/NotMatch entries and their content
 		// exist in the command's output.
 		// Essentialy is a small helper, it can be done with regex as well.
-		Contains bool `yaml:"contains,omitempty"`
+		Partial bool `yaml:"partial,omitempty"`
 	}
 
 	// OutFilters is a set of `OutFilter`.
@@ -103,13 +103,13 @@ func canPassAgainstBackwards(against, output string, noregex bool) (bool, error)
 func canPassAgainst(against, output string, f OutFilter) (bool, error) {
 	if f.NoRegex {
 		against, output = removeNewLine(against), removeNewLine(output)
-		if f.Contains {
+		if f.Partial {
 			return strings.Contains(output, against), nil
 		}
 		return output == against, nil
 	}
 
-	if f.Contains {
+	if f.Partial {
 		return strings.Contains(output, against), nil
 	}
 
@@ -161,7 +161,7 @@ func (f OutFilter) check(output string) (bool, error) {
 				errMsg += " Output is empty ''."
 			}
 			matchErrors[i] = append(matchErrors[i], errMsg)
-		} else if f.Contains { // we passed at least one case, break.
+		} else if f.Partial { // we passed at least one case, break.
 			// and delete any previous errors for THIS `match` entry.
 			for j := 0; j < i; j++ {
 				delete(matchErrors, j)
@@ -184,8 +184,8 @@ func (f OutFilter) check(output string) (bool, error) {
 		if pass {
 			notMatchErrors[i] = append(notMatchErrors[i], fmt.Sprintf("not_match: should not expected '%s'.", v))
 		} else if errPass == nil {
-			pass = true     // we can ignore it because we only check for errMsg != "", it's here for readability.
-			if f.Contains { // we passed at least one case, break.
+			pass = true    // we can ignore it because we only check for errMsg != "", it's here for readability.
+			if f.Partial { // we passed at least one case, break.
 				// and delete any previous errors for THIS `match` entry.
 				for j := 0; j < i; j++ {
 					delete(notMatchErrors, j)
