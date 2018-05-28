@@ -297,7 +297,7 @@ func main() {
 			// Perform a textTest on outputs.
 			_, textErr := v.Test(stdout, stderr)
 
-			if err != nil && timerLive && !v.IgnoreExitCode {
+			if err != nil && timerLive && !v.IgnoreExitCode && textErr != nil {
 				logger.Printf("Error, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
 			} else if err != nil && !timerLive {
 				logger.Printf("Timeout, command '%s', test '%s'. Error: %s, Stderr: %s\n", v.Command, v.Name, err.Error(), strconv.Quote(stderr))
@@ -310,7 +310,7 @@ func main() {
 			if v.NoLog == false {
 				var t = Result{Name: v.Name, Command: v.Command, Stdout: strings.Split(stdout, "\n"), Stderr: strings.Split(stderr, "\n")}
 
-				if (err == nil || v.IgnoreExitCode) && textErr == nil {
+				if ((err == nil || v.IgnoreExitCode) && textErr == nil) || textErr == nil /* fixes throwing error on expected stderr */ {
 					t.Status = "ok"
 					if err != nil { // Here we have ignore_exit_code
 						t.Exit = "(ignore) " + strings.Replace(err.Error(), "exit status ", "", 1)
