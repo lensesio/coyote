@@ -54,7 +54,7 @@ func TestOutFilterPartial(t *testing.T) {
 				Name: "test when partial is true for the first filter with a single match but second does not exist and partial is false",
 				Stdout: OutFilters{
 					OutFilter{
-						Match:   append([]string{}, "nullsink"),
+						Match:   []string{"nullsink"},
 						Partial: true,
 					},
 					OutFilter{
@@ -69,7 +69,7 @@ func TestOutFilterPartial(t *testing.T) {
 			entry: Entry{
 				Name: "test when partial is true but reverse order, first element does not exist but second does",
 				Stdout: OutFilters{OutFilter{
-					Match:   append([]string{}, "not", "logs-broker"),
+					Match:   []string{"not", "logs-broker"},
 					Partial: true,
 				}},
 			},
