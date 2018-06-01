@@ -244,7 +244,7 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 		}
 
 		if pass {
-			errMsg = fmt.Sprintf("%sStdout_not_has not matched expected '%s'.\n", errMsg, v)
+			errMsg = fmt.Sprintf("%sStdout_not_has matched not expected '%s'.\n", errMsg, v)
 		} else if errPass == nil {
 			pass = true // pass the test.
 		}
@@ -276,11 +276,11 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 
 		pass, errPass := canPassAgainstBackwards(v, stderr, e.NoRegex)
 		if errPass != nil {
-			errMsg = fmt.Sprintf("%sStderr_has Bad Regexp: %v. \n", errMsg, errPass)
+			errMsg = fmt.Sprintf("%sStderr_not_has Bad Regexp: %v. \n", errMsg, errPass)
 		}
 
 		if pass {
-			errMsg = fmt.Sprintf("%sStderr_has not matched expected '%s'.\n", errMsg, v)
+			errMsg = fmt.Sprintf("%sStderr_not_has matched not expected '%s'.\n", errMsg, v)
 		} else if errPass == nil {
 			pass = true // we can ignore it because we only check for errMsg != "", it's here for readability.
 		}
