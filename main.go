@@ -147,7 +147,7 @@ func main() {
 	// Set the available loaders to load EntryGroups from.
 	var loaders = []EntryLoader{
 		// from yaml file(s) configuration.
-		FileEntryLoader(configFilesArray),
+		FileEntryGroupLoader(configFilesArray),
 	}
 
 	// Load the set of `EntryGroup` based on the available `EntryLoader`s.
