@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"runtime"
 	"testing"
 )
 
@@ -26,6 +28,45 @@ func TestOutFilterNoRegex(t *testing.T) {
 
 	if !ok && err == nil {
 		t.Fatalf("expected to be passed if error is nil")
+	}
+}
+
+func TestBackwardsCompatibility(t *testing.T) {
+	yamlContents := []byte(`
+- name: Tests
+  entries:
+   - name: Stdout_has | must pass
+     command: echo "hello world"
+     stdout_has: ["hello", "world" ]
+
+   - name: Stdout_has | must not pass
+     command: echo "hello world"
+     stdout_has: ["hello"]
+     stdout_not_has: ["apple"]
+
+   - name: Stdout_not_has | must pass
+     command: echo "hello world"
+     stdout_not_has: ["orange", "apple"]
+
+   - name: Stdout_not_has | must not pass
+     command: echo "hello world"
+     stdout_not_has: ["apple"]`)
+
+	if runtime.GOOS == "windows" {
+		yamlContents = bytes.Replace(yamlContents, []byte("echo"), []byte("cmd /C echo"), -1)
+	}
+
+	var groups []EntryGroup
+	if err := TextEntryGroupLoader(yamlContents).Load(&groups); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, group := range groups {
+		for j, entry := range group.Entries {
+			if _, err := entry.TestCommand(); err != nil {
+				t.Fatalf("[%d:%d] test '%s' failed: %v", i, j, entry.Name, err)
+			}
+		}
 	}
 }
 

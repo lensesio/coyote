@@ -3,9 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"time"
+
+	shellwords "github.com/mattn/go-shellwords"
 )
 
 type (
@@ -38,9 +42,18 @@ type (
 		Stdout OutFilters `yaml:"stdout,omitempty"`
 		Stderr OutFilters `yaml:"stderr,omitempty"`
 
-		IgnoreExitCode bool   `yaml:"ignore_exit_code,omitempty"`
-		Skip           string `yaml:"skip,omitempty"`   // Skips only if true
-		NoSkip         string `yaml:"noskip,omitempty"` // Skips if it is set and not true
+		IgnoreExitCode bool `yaml:"ignore_exit_code,omitempty"`
+
+		// Skip will Skip only if "true".
+		// It's type of string instead of bool because it is meant to help with manipulating tests from scripts.
+		//
+		// See `NoSkip` too.
+		Skip string `yaml:"skip,omitempty"`
+		// NoSkip will skip if it is set and not "true".
+		// It's type of string instead of bool because it is meant to help with manipulating tests from scripts.
+		//
+		// See `Skip` too.
+		NoSkip string `yaml:"noskip,omitempty"`
 	}
 
 	// OutFilter describes the stdout and stderr output's search expectation.
@@ -212,7 +225,7 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 
 		pass, errPass := canPassAgainstBackwards(v, stdout, e.NoRegex)
 		if errPass != nil {
-			errMsg = fmt.Sprintf("Stdout_has Bad Regexp: %v. \n", errPass)
+			errMsg = fmt.Sprintf("%sStdout_has Bad Regexp: %v. \n", errMsg, errPass)
 		}
 
 		if !pass {
@@ -236,6 +249,10 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 			pass = true // pass the test.
 		}
 	}
+
+	// if errMsg != "" {
+	// 	errMsg += fmt.Sprintf("Output was: '%s'", stdout)
+	// }
 
 	for _, v := range e.StderrExpect {
 		if v == "" {
@@ -320,7 +337,7 @@ func (e *Entry) MapVars(localVars, globalVars map[string]string) { // note that 
 func (e *Entry) Test(stdout, stderr string) (bool, error) {
 	// here we can mix the old and new syntax,
 	// first check if with the old syntax passed, if passed and has new syntax is there, check that as well, otherwise fail.
-	shouldFirstCheckForOld := len(e.StderrExpect) > 0 || len(e.StderrNotExpect) > 0
+	shouldFirstCheckForOld := len(e.StdoutExpect)+len(e.StdoutNotExpect)+len(e.StderrExpect)+len(e.StderrNotExpect) > 0
 	if shouldFirstCheckForOld {
 		if _, err := e.testBackwards(stdout, stderr); err != nil {
 			return false, err
@@ -342,4 +359,41 @@ func (e *Entry) Test(stdout, stderr string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// TestCommand will test against the entry's command's output result.
+func (e *Entry) TestCommand() (bool, error) {
+	args, err := shellwords.Parse(e.Command)
+	if err != nil {
+		return false, err
+	}
+
+	if len(args) == 0 { // Empty command?
+		return false, fmt.Errorf("test '%s' is missing the command field", e.Name)
+	}
+
+	cmd := exec.Command(args[0], args[1:]...)
+
+	if len(e.WorkDir) > 0 {
+		cmd.Dir = e.WorkDir
+	}
+	if len(e.Stdin) > 0 {
+		cmd.Stdin = strings.NewReader(e.Stdin)
+	}
+
+	cmd.Env = os.Environ()
+	if len(e.EnvVars) > 0 {
+		for _, v := range e.EnvVars {
+			cmd.Env = append(cmd.Env, v)
+		}
+	}
+
+	cmdOut, cmdErr := new(strings.Builder), new(strings.Builder)
+	cmd.Stdout, cmd.Stderr = cmdOut, cmdErr
+
+	if err = cmd.Run(); err != nil {
+		return false, err
+	}
+
+	return e.Test(cmdOut.String(), cmdErr.String())
 }

@@ -54,9 +54,9 @@ type EntryLoader interface {
 	Load(groups *[]EntryGroup) error
 }
 
-// FileEntryLoader is an implementation of the `EntryLoader`
+// FileEntryGroupLoader is an implementation of the `EntryLoader`
 // which loads a set of `EntryGroup` based on caller-specific yaml files.
-type FileEntryLoader []string
+type FileEntryGroupLoader []string
 
 // AddFile adds file(s) to be loaded on `Load`.
 // Note that it doesn't check for file existence, only `Load` does that.
@@ -80,7 +80,7 @@ type FileEntryLoader []string
 // }
 
 // Load updates the "groups" based on the contents of the corresponding yaml files.
-func (l FileEntryLoader) Load(groups *[]EntryGroup) error {
+func (l FileEntryGroupLoader) Load(groups *[]EntryGroup) error {
 	for idx, file := range l {
 		data, err := ioutil.ReadFile(file)
 		if err != nil {
@@ -105,5 +105,20 @@ func (l FileEntryLoader) Load(groups *[]EntryGroup) error {
 		mergeEntryGroups(groups, newGroups)
 	}
 
+	return nil
+}
+
+// TextEntryGroupLoader is an implementation of the `EntryLoader`
+// which loads a set of `EntryGroup` based on caller-specific yaml raw text contents.
+type TextEntryGroupLoader []byte
+
+// Load updates the "groups" based on the contents of the corresponding raw yaml contents.
+func (l TextEntryGroupLoader) Load(groups *[]EntryGroup) error {
+	var newGroups []EntryGroup
+	if err := yaml.Unmarshal(l, &newGroups); err != nil {
+		return fmt.Errorf("error reading configuration contents: %v", err)
+	}
+
+	mergeEntryGroups(groups, newGroups)
 	return nil
 }
