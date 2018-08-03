@@ -15,13 +15,14 @@ import (
 type (
 	// Entry contains the test case's entries' structure, see examples for more.
 	Entry struct {
-		Name    string        `yaml:"name"`
-		WorkDir string        `yaml:"workdir"`
-		Command string        `yaml:"command,omitempty"`
-		Stdin   string        `yaml:"stdin,omitempty"`
-		NoLog   bool          `yaml:"nolog,omitempty"`
-		EnvVars []string      `yaml:"env,omitempty"`
-		Timeout time.Duration `yaml:"timeout,omitempty"`
+		Name        string        `yaml:"name"`
+		Description string        `yaml:"description,omitempty"`
+		WorkDir     string        `yaml:"workdir"`
+		Command     string        `yaml:"command,omitempty"`
+		Stdin       string        `yaml:"stdin,omitempty"`
+		NoLog       bool          `yaml:"nolog,omitempty"`
+		EnvVars     []string      `yaml:"env,omitempty"`
+		Timeout     time.Duration `yaml:"timeout,omitempty"`
 
 		// It differs from the `Timeout`,
 		// `SleepBefore` will wait for 'x' duration before the execution of this command.

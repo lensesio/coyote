@@ -9,13 +9,14 @@ import (
 )
 
 type EntryGroup struct {
-	Name    string            `yaml:"name"`
-	Entries []Entry           `yaml:"entries"`
-	Title   string            `yaml:"title,omitempty"`
-	Skip    string            `yaml:"skip"`
-	NoSkip  string            `yaml:"noskip,omitempty"`
-	Type    string            `yaml:"type,omitempty"`
-	Vars    map[string]string `yaml:"vars,omitempty"`
+	Name        string            `yaml:"name"`
+	Description string            `yaml:"description,omitempty"`
+	Entries     []Entry           `yaml:"entries"`
+	Title       string            `yaml:"title,omitempty"`
+	Skip        string            `yaml:"skip"`
+	NoSkip      string            `yaml:"noskip,omitempty"`
+	Type        string            `yaml:"type,omitempty"`
+	Vars        map[string]string `yaml:"vars,omitempty"`
 }
 
 // mergeEntryGroups appends the entries of the "newGroups" to the "groups".
