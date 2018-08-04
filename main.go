@@ -52,6 +52,7 @@ var (
 	version          = flag.Bool("version", false, "print coyote version")
 	customTemplate   = flag.String("template", "", "override internal golang template with this")
 	mergeResults     = flag.Bool("merge-results", false, "merge all trailing json results into one")
+	testGroups       = flag.String("run", ".*", "run tests against a particular set of entries by group name (regex). Works in converse of the inline 'skip' YAML option")
 )
 
 var (
@@ -153,10 +154,23 @@ func main() {
 	// Load the set of `EntryGroup` based on the available `EntryLoader`s.
 	var entriesGroups []EntryGroup
 
+	// we load all of them.
 	for _, loader := range loaders {
 		if err := loader.Load(&entriesGroups); err != nil {
 			// exit on first error.
 			logger.Fatal(err)
+		}
+	}
+
+	// keep only the user-defined "testGroups", if value not changed don't waste time here.
+	if q := *testGroups; q != ".*" {
+		testGroupsRegexp := regexp.MustCompile(q)
+
+		for i, v := range entriesGroups {
+			if !testGroupsRegexp.MatchString(v.Name) {
+				logger.Printf("Skipping processing group: [ %s ]\n", v.Name)
+				entriesGroups = append(entriesGroups[:i], entriesGroups[i+1:]...)
+			}
 		}
 	}
 
