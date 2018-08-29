@@ -324,7 +324,7 @@ func main() {
 			if v.NoLog == false {
 				var t = Result{Name: v.Name, Command: v.Command, Stdout: strings.Split(stdout, "\n"), Stderr: strings.Split(stderr, "\n")}
 
-				if ((err == nil || v.IgnoreExitCode) && textErr == nil) || textErr == nil /* fixes throwing error on expected stderr */ {
+				if (err == nil || v.IgnoreExitCode) && textErr == nil {
 					t.Status = "ok"
 					if err != nil { // Here we have ignore_exit_code
 						t.Exit = "(ignore) " + strings.Replace(err.Error(), "exit status ", "", 1)
