@@ -71,6 +71,16 @@
       stdin: |
         First: %UNIQUE% Second: %UNIQUE%
 
+- name: test unique string matching
+  entries:
+  - name: command
+    command: echo %UNIQUE%
+  - name: stdin
+    command: cat
+    stdin: |
+      First: %UNIQUE_1% Second: %UNIQUE%
+    stdout_has: [ "%UNIQUE_1%" ]
+
 - name: test ignore exit code
   entries:
     - name: ignore exit code

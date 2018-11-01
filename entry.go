@@ -110,7 +110,6 @@ func canPassAgainstBackwards(against, output string, noregex bool) (bool, error)
 		against, output = removeNewLine(against), removeNewLine(output)
 		return output == against, nil
 	}
-
 	return regexp.MatchString(against, output)
 }
 
@@ -223,14 +222,14 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 		if v == "" {
 			continue
 		}
-
-		pass, errPass := canPassAgainstBackwards(v, stdout, e.NoRegex)
+		toMatch := replaceUnique(v)
+		pass, errPass := canPassAgainstBackwards(toMatch, stdout, e.NoRegex)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("%sStdout_has Bad Regexp: %v. \n", errMsg, errPass)
 		}
 
 		if !pass {
-			errMsg = fmt.Sprintf("%sStdout_has not matched expected '%s'.\n", errMsg, v)
+			errMsg = fmt.Sprintf("%sStdout_has not matched expected '%s'.\n", errMsg, toMatch)
 		}
 	}
 
@@ -238,14 +237,14 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 		if v == "" {
 			continue
 		}
-
-		pass, errPass := canPassAgainstBackwards(v, stdout, e.NoRegex)
+		toMatch := replaceUnique(v)
+		pass, errPass := canPassAgainstBackwards(toMatch, stdout, e.NoRegex)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("%sStdout_not_has Bad Regexp: %v. \n", errMsg, errPass)
 		}
 
 		if pass {
-			errMsg = fmt.Sprintf("%sStdout_not_has matched not expected '%s'.\n", errMsg, v)
+			errMsg = fmt.Sprintf("%sStdout_not_has matched not expected '%s'.\n", errMsg, toMatch)
 		} else if errPass == nil {
 			pass = true // pass the test.
 		}
@@ -259,14 +258,14 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 		if v == "" {
 			continue
 		}
-
-		pass, errPass := canPassAgainstBackwards(v, stderr, e.NoRegex)
+		toMatch := replaceUnique(v)
+		pass, errPass := canPassAgainstBackwards(toMatch, stderr, e.NoRegex)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("%sStderr_has Bad Regexp: %v. \n", errMsg, errPass)
 		}
 
 		if !pass {
-			errMsg = fmt.Sprintf("%sStderr_has not matched expected '%s'.\n", errMsg, v)
+			errMsg = fmt.Sprintf("%sStderr_has not matched expected '%s'.\n", errMsg, toMatch)
 		}
 	}
 
@@ -274,14 +273,14 @@ func (e *Entry) testBackwards(stdout, stderr string) (bool, error) {
 		if v == "" {
 			continue
 		}
-
-		pass, errPass := canPassAgainstBackwards(v, stderr, e.NoRegex)
+		toMatch := replaceUnique(v)
+		pass, errPass := canPassAgainstBackwards(toMatch, stderr, e.NoRegex)
 		if errPass != nil {
 			errMsg = fmt.Sprintf("%sStderr_not_has Bad Regexp: %v. \n", errMsg, errPass)
 		}
 
 		if pass {
-			errMsg = fmt.Sprintf("%sStderr_not_has matched not expected '%s'.\n", errMsg, v)
+			errMsg = fmt.Sprintf("%sStderr_not_has matched not expected '%s'.\n", errMsg, toMatch)
 		} else if errPass == nil {
 			pass = true // we can ignore it because we only check for errMsg != "", it's here for readability.
 		}
