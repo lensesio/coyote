@@ -146,9 +146,9 @@ func main() {
 	logger.Printf("Starting coyote-tester\n")
 
 	// Set the available loaders to load EntryGroups from.
-	var loaders = []EntryLoader{
+	var loaders = []ContextLoader{
 		// from yaml file(s) configuration.
-		FileEntryGroupLoader(configFilesArray),
+		FileContextLoader(configFilesArray),
 	}
 
 	// Load the set of `EntryGroup` based on the available `EntryLoader`s.
