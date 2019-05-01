@@ -88,8 +88,7 @@ func (l FileEntryGroupLoader) Load(groups *[]EntryGroup) error {
 			return err
 		}
 
-		var newGroups []EntryGroup
-		if err = yaml.Unmarshal(data, &newGroups); err != nil {
+		if err = TextEntryGroupLoader(data).Load(groups); err != nil {
 			errMsg := fmt.Sprintf("error reading configuration file(%s): %v", file, err)
 			if idx > 0 {
 				loadedSuc := l[0:idx]
@@ -102,8 +101,6 @@ func (l FileEntryGroupLoader) Load(groups *[]EntryGroup) error {
 
 			return fmt.Errorf(errMsg)
 		}
-
-		mergeEntryGroups(groups, newGroups)
 	}
 
 	return nil
