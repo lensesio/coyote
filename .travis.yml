@@ -16,3 +16,12 @@ notifications:
 
 script:
   - go test -v -race ./...  # Run all the tests with the race detector enabled
+
+jobs:
+  include:
+    - stage: build docker image
+      script:
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - docker build -t coyote-testing-ci .
+      - docker tag coyote-testing-ci $DOCKER_USERNAME/coyote-testing-ci
+      - docker push $DOCKER_USERNAME/coyote-testing-ci
