@@ -21,6 +21,7 @@ $ go get -u github.com/landoop/coyote
 
 ### Running
 
+#### Locally
 Getting your tests ran by the `coyote -c` command.
 
 ```sh
@@ -41,6 +42,14 @@ which we use to test our Kafka setup for the
 
 > Note that coyote stores the stderr and stdout of each command in memory, so
 it isn't suitable for testing commands with huge outputs
+
+#### Docker
+
+you can also use the docker version:
+
+```sh
+docker run --rm -it lensesio/coyote --name coyote -u appuser
+```
 
 ### Examples
 
