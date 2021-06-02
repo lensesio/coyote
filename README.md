@@ -121,4 +121,5 @@ Read more about Semantic Versioning 2.0.0
 
 ## License
 
-Distributed under GPLv3, See [COPYING](COPYING) for more information.
+Distributed under Apache 2.0, See [LICENSE](LICENSE) for more information.
+
