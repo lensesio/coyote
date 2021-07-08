@@ -93,35 +93,6 @@ func (i *configFilesArrayFlag) Set(value string) error {
 	return nil
 }
 
-func init() {
-	logger = log.New(os.Stderr, "", log.Ldate|log.Ltime)
-
-	flag.Var(&configFilesArray, "c", "configuration file(s), may be set more than once (default \"coyote.yml\")")
-	flag.Parse()
-	if len(configFilesArray) == 0 {
-		configFilesArray = append(configFilesArray, "coyote.yml")
-	}
-
-	if *defaultTimeout == 0 {
-		*defaultTimeout = time.Duration(365 * 24 * time.Hour)
-	}
-
-	var err error
-	var templateData = make([]byte, 0)
-	if len(*customTemplate) == 0 {
-		t, err = template.New("").Delims("<{=(", ")=}>").Parse(mainTemplate)
-	} else {
-		templateData, err = ioutil.ReadFile(*customTemplate)
-		if err == nil {
-			t, err = template.New("").Delims("<{=(", ")=}>").Parse(string(templateData))
-		}
-	}
-	if err != nil {
-		logger.Printf("Error while trying to load template: %s\n", err)
-		os.Exit(255)
-	}
-}
-
 func main() {
 	if *version == true {
 		fmt.Printf("This is Landoop's Coyote %s.\n", vgVersion)

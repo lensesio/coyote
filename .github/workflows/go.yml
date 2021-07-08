@@ -1,0 +1,45 @@
+name: Go
+on: [push, pull_request]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Unshallow
+      run: git fetch --prune --unshallow
+    - name: Get dependencies
+      run: go get -v -t -d ./...
+    - name: Build
+      run: go build -v .
+    - name: Run GoReleaser
+      uses: goreleaser/goreleaser-action@v1
+      with:
+        version: latest
+        args: release --rm-dist
+        key: ${{ secrets.YOUR_PRIVATE_KEY }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
+  test:
+    strategy:
+      matrix:
+        go-version: [1.12.x, 1.13.x]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Get dependencies
+      run: go get -v -t -d ./...
+    - name: Test
+      run: go test -v -race ./...  # Run all the tests with the race detector enabled
